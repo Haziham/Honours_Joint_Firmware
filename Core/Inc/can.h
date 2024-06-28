@@ -29,18 +29,29 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "can_queues.h"
+#include "cmsis_os.h"
 /* USER CODE END Includes */
 
 extern CAN_HandleTypeDef hcan;
+extern osMutexId CANTxDataHandle;
+extern osMutexId CANRxDataHandle;
 
 /* USER CODE BEGIN Private defines */
-
+#define CAN_TX_QUEUE_SIZE 16
+#define CAN_RX_QUEUE_SIZE 16
 /* USER CODE END Private defines */
 
 void MX_CAN_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+CAN_Message_t canTxBuffer[CAN_TX_QUEUE_SIZE];
+CAN_Message_t canRxBuffer[CAN_TX_QUEUE_SIZE];
+
+CAN_Queue_t canTxQueue;
+CAN_Queue_t canRxQueue;
+
+void CAN_InitQueues(void);
 
 /* USER CODE END Prototypes */
 

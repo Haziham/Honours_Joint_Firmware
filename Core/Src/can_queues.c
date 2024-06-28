@@ -1,12 +1,13 @@
 #include "can_queues.h"
 
-void CAN_queue_init(CAN_Queue_t *queue, CAN_Message_t *data, uint8_t size)
+void CAN_queue_init(CAN_Queue_t *queue, CAN_Message_t *data, uint8_t size, osMutexId mutex)
 {
     queue->data = data;
     queue->head = 0;
     queue->tail = 0;
     queue->count = 0;
     queue->size = size;
+    queue->mutex = mutex;
 }
 
 uint8_t CAN_enqueue_message(CAN_Queue_t *queue, CAN_Message_t *message)

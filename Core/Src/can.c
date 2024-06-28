@@ -59,6 +59,7 @@ void MX_CAN_Init(void)
 
 }
 
+
 void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
 {
 
@@ -114,4 +115,9 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 
 /* USER CODE BEGIN 1 */
 
+void CAN_InitQueues(void)
+{
+    CAN_queue_init(&canTxQueue, canTxBuffer, CAN_TX_QUEUE_SIZE, CANTxDataHandle);
+    CAN_queue_init(&canRxQueue, canRxBuffer, CAN_RX_QUEUE_SIZE, CANRxDataHandle);
+}
 /* USER CODE END 1 */
