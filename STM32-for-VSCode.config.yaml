@@ -75,6 +75,7 @@ includeDirectories:
   - Src/**
   - Core/Src/**
   - Core/Lib/**
+  - hlib/freckle/*
 
 
 # Files that should be included in the compilation.
@@ -86,6 +87,7 @@ sourceFiles:
   - Src/**
   - Core/Src/**
   - Core/Lib/**
+  - hlib/freckle/*
 
 
 # When no makefile is present it will show a warning pop-up.

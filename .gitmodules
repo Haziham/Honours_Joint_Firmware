@@ -1,0 +1,3 @@
+[submodule "hlib"]
+	path = hlib
+	url = https://github.com/Haziham/hlib.git
