@@ -22,6 +22,11 @@
 
 /* USER CODE BEGIN 0 */
 
+CAN_Message_t canTxBuffer[CAN_TX_QUEUE_SIZE];
+CAN_Message_t canRxBuffer[CAN_TX_QUEUE_SIZE];
+
+CAN_Queue_t canTxQueue;
+CAN_Queue_t canRxQueue;
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan;

@@ -26,6 +26,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "can_queues.h"
+#include "can.h"
+#include "freckle_protocol.h"
+#include "stm32f0xx_hal_tim.h"
+#include "tim.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -131,11 +135,23 @@ void MX_FREERTOS_Init(void) {
 void startControlSystem(void const * argument)
 {
   /* USER CODE BEGIN startControlSystem */
+  __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
+  JointSettings_t jointSettings;
+  jointSettings.jointType = JOINT_HIP_YAW;
+  jointSettings.legNumber = 0;
+  jointSettings.maxAngle = 8.9;
+  jointSettings.minAngle = 6.7;
+  jointSettings.nodeId = 5;
+
+  CAN_Message_t canMessage;  
+
   /* Infinite loop */
   for(;;)
   {
-
-    osDelay(3);
+    encodeJointSettingsPacketStructure(&canMessage, &jointSettings);
+    finishFrecklePacket(&canMessage, getJointSettingsMaxDataLength(), getJointSettingsPacketID());
+    CAN_enqueue_message(&canTxQueue, &canMessage);
+    osDelay(5000);
   }
   /* USER CODE END startControlSystem */
 }
@@ -150,10 +166,31 @@ void startControlSystem(void const * argument)
 void transmit_can_frame(void const * argument)
 {
   /* USER CODE BEGIN transmit_can_frame */
+  __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
+  CAN_Message_t canMessage;
+  CAN_TxHeaderTypeDef canHeader;
+  uint32_t txMailbox;
+
+  canHeader.IDE = CAN_ID_STD;
+  canHeader.RTR = CAN_RTR_DATA;
+  uint16_t counter = 0;
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+
+    __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
+    if(CAN_dequeue_message(&canTxQueue, &canMessage))
+    {
+      canHeader.StdId = canMessage.id;
+      canHeader.DLC = canMessage.len;
+      if (HAL_CAN_AddTxMessage(&hcan, &canHeader, canMessage.data, &txMailbox) != HAL_OK)
+      {
+        Error_Handler();
+      }
+    }
+    counter += 1000;
+    osDelay(1000);
+    
   }
   /* USER CODE END transmit_can_frame */
 }
