@@ -27,7 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "can_queues.h";
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -109,7 +109,6 @@ int main(void)
 
   __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 0);
   __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 40000);
-
 
   /* USER CODE END 2 */
 

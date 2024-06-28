@@ -38,6 +38,7 @@ BUILD_DIR = build
 C_SOURCES =  \
 Core/Src/adc.c \
 Core/Src/can.c \
+Core/Src/can_queues.c \
 Core/Src/freertos.c \
 Core/Src/gpio.c \
 Core/Src/main.c \
@@ -78,7 +79,13 @@ Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
 Middlewares/Third_Party/FreeRTOS/Source/queue.c \
 Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c \
 Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
-Middlewares/Third_Party/FreeRTOS/Source/timers.c
+Middlewares/Third_Party/FreeRTOS/Source/timers.c \
+hlib/freckle/FreckleProtocol.c \
+hlib/freckle/fielddecode.c \
+hlib/freckle/fieldencode.c \
+hlib/freckle/freckle_protocol.c \
+hlib/freckle/scaleddecode.c \
+hlib/freckle/scaledencode.c
 
 
 CPP_SOURCES = \
@@ -157,7 +164,8 @@ C_INCLUDES =  \
 -IDrivers/STM32F0xx_HAL_Driver/Inc/Legacy \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
 -IMiddlewares/Third_Party/FreeRTOS/Source/include \
--IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0
+-IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 \
+-Ihlib/freckle
 
 
 

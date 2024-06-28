@@ -177,3 +177,4 @@ VP_TIM14_VS_ClockSourceINT.Signal=TIM14_VS_ClockSourceINT
 VP_TIM16_VS_ClockSourceINT.Mode=Enable_Timer
 VP_TIM16_VS_ClockSourceINT.Signal=TIM16_VS_ClockSourceINT
 board=custom
+rtos.0.ip=FREERTOS
