@@ -99,7 +99,7 @@ int main(void)
   MX_TIM14_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
-  // CAN_InitQueues();
+  CAN_InitQueues();
 
   // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);

@@ -1,0 +1,45 @@
+
+void startControlSystem(void const * argument)
+{
+  /* USER CODE BEGIN startControlSystem */
+  /* USER CODE END startControlSystem */
+}
+
+/* USER CODE BEGIN Header_transmit_can_frame */
+/**
+* @brief Function implementing the canTransmit thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_transmit_can_frame */
+void transmit_can_frame(void const * argument)
+{
+  /* USER CODE BEGIN transmit_can_frame */
+  __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
+  CAN_Message_t canMessage;
+  CAN_TxHeaderTypeDef canHeader;
+  uint32_t txMailbox;
+
+  canHeader.IDE = CAN_ID_STD;
+  canHeader.RTR = CAN_RTR_DATA;
+  uint16_t counter = 0;
+  /* Infinite loop */
+  for(;;)
+  {
+
+    __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
+    if(CAN_dequeue_message(&canTxQueue, &canMessage))
+    {
+      canHeader.StdId = canMessage.id;
+      canHeader.DLC = canMessage.len;
+      if (HAL_CAN_AddTxMessage(&hcan, &canHeader, canMessage.data, &txMailbox) != HAL_OK)
+      {
+        Error_Handler();
+      }
+    }
+    counter += 1000;
+    osDelay(1000);
+    
+  }
+  /* USER CODE END transmit_can_frame */
+}

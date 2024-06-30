@@ -52,23 +52,17 @@
 
 /* USER CODE END Variables */
 osThreadId controlSystemHandle;
-uint32_t controlSystemBuffer[ 128 ];
-osStaticThreadDef_t controlSystemControlBlock;
 osThreadId canTransmitHandle;
-uint32_t canTransmitBuffer[ 128 ];
-osStaticThreadDef_t canTransmitControlBlock;
 osMutexId CANTxDataHandle;
-osStaticMutexDef_t CANTxDataControlBlock;
 osMutexId CANRxDataHandle;
-osStaticMutexDef_t CANRxDataControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
 /* USER CODE END FunctionPrototypes */
 
-void startControlSystem(void const * argument);
-void transmit_can_frame(void const * argument);
+void control_system_task(void const * argument);
+void transmit_can_frame_task(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -95,7 +89,13 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
+    osThreadDef(controlSystemHandle, control_system_task, osPriorityNormal, 0, 128);
+    controlSystemHandle = osThreadCreate(osThread(controlSystemHandle), NULL);
+    osThreadDef(canTransmitHandle, transmit_can_frame_task, osPriorityNormal, 0, 128);
+    canTransmitHandle = osThreadCreate(osThread(canTransmitHandle), NULL);
 
+    CANTxDataHandle = xSemaphoreCreateMutex();
+    CANRxDataHandle = xSemaphoreCreateMutex();
   /* USER CODE END Init */
 /* USER CODE BEGIN Header */
 /**
@@ -125,17 +125,17 @@ void MX_FREERTOS_Init(void) {
   */
 }
 
-/* USER CODE BEGIN Header_startControlSystem */
+/* USER CODE BEGIN Header_control_system_task */
 /**
-  * @brief  Function implementing the controlSystem thread.
+  * @brief  Function implementing the controlSystemHa thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_startControlSystem */
-void startControlSystem(void const * argument)
+/* USER CODE END Header_control_system_task */
+void control_system_task(void const * argument)
 {
-  /* USER CODE BEGIN startControlSystem */
-  __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
+  /* USER CODE BEGIN control_system_task */
+  // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
   JointSettings_t jointSettings;
   jointSettings.jointType = JOINT_HIP_YAW;
   jointSettings.legNumber = 0;
@@ -153,19 +153,19 @@ void startControlSystem(void const * argument)
     CAN_enqueue_message(&canTxQueue, &canMessage);
     osDelay(5000);
   }
-  /* USER CODE END startControlSystem */
+  /* USER CODE END control_system_task */
 }
 
-/* USER CODE BEGIN Header_transmit_can_frame */
+/* USER CODE BEGIN Header_transmit_can_frame_task */
 /**
-* @brief Function implementing the canTransmit thread.
+* @brief Function implementing the canTransmitHand thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_transmit_can_frame */
-void transmit_can_frame(void const * argument)
+/* USER CODE END Header_transmit_can_frame_task */
+void transmit_can_frame_task(void const * argument)
 {
-  /* USER CODE BEGIN transmit_can_frame */
+  /* USER CODE BEGIN transmit_can_frame_task */
   __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
   CAN_Message_t canMessage;
   CAN_TxHeaderTypeDef canHeader;
@@ -192,7 +192,7 @@ void transmit_can_frame(void const * argument)
     osDelay(1000);
     
   }
-  /* USER CODE END transmit_can_frame */
+  /* USER CODE END transmit_can_frame_task */
 }
 
 /* Private application code --------------------------------------------------*/
