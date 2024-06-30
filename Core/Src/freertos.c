@@ -89,13 +89,13 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-    osThreadDef(controlSystemHandle, control_system_task, osPriorityNormal, 0, 128);
+    osThreadDef(controlSystemHandle, control_system_task, osPriorityNormal, 0, 64);
     controlSystemHandle = osThreadCreate(osThread(controlSystemHandle), NULL);
-    osThreadDef(canTransmitHandle, transmit_can_frame_task, osPriorityNormal, 0, 128);
-    canTransmitHandle = osThreadCreate(osThread(canTransmitHandle), NULL);
+    osThreadDef(canTransmitHandle, transmit_can_frame_task, osPriorityNormal, 0, 64);
+    canTransmitHandle = osThreadCreate(osThread(canTransmitHandle), NULL); 
 
-    CANTxDataHandle = xSemaphoreCreateMutex();
-    CANRxDataHandle = xSemaphoreCreateMutex();
+    // CANTxDataHandle = xSemaphoreCreateMutex();
+    // CANRxDataHandle = xSemaphoreCreateMutex();
   /* USER CODE END Init */
 /* USER CODE BEGIN Header */
 /**
