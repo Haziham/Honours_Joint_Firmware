@@ -40,12 +40,10 @@ Core/Src/FreckleProtocol.c \
 Core/Src/adc.c \
 Core/Src/can.c \
 Core/Src/can_queues.c \
-Core/Src/freertos.c \
 Core/Src/gpio.c \
 Core/Src/main.c \
 Core/Src/spi.c \
 Core/Src/stm32f0xx_hal_msp.c \
-Core/Src/stm32f0xx_hal_timebase_tim.c \
 Core/Src/stm32f0xx_it.c \
 Core/Src/syscalls.c \
 Core/Src/sysmem.c \
@@ -71,16 +69,6 @@ Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_spi.c \
 Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_spi_ex.c \
 Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_tim.c \
 Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_tim_ex.c \
-Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c \
-Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
-Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
-Middlewares/Third_Party/FreeRTOS/Source/list.c \
-Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/port.c \
-Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
-Middlewares/Third_Party/FreeRTOS/Source/queue.c \
-Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c \
-Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
-Middlewares/Third_Party/FreeRTOS/Source/timers.c \
 hlib/freckle/fielddecode.c \
 hlib/freckle/fieldencode.c \
 hlib/freckle/freckle_protocol.c \
@@ -162,9 +150,6 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Include \
 -IDrivers/STM32F0xx_HAL_Driver/Inc \
 -IDrivers/STM32F0xx_HAL_Driver/Inc/Legacy \
--IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
--IMiddlewares/Third_Party/FreeRTOS/Source/include \
--IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 \
 -Ihlib/freckle
 
 

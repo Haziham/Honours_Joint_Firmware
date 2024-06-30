@@ -30,7 +30,6 @@ extern "C" {
 
 /* USER CODE BEGIN Includes */
 #include "can_queues.h"
-#include "cmsis_os.h"
 /* USER CODE END Includes */
 
 extern CAN_HandleTypeDef hcan;
@@ -39,8 +38,6 @@ extern CAN_HandleTypeDef hcan;
 #define CAN_TX_QUEUE_SIZE 16
 #define CAN_RX_QUEUE_SIZE 16
 
-extern osMutexId CANTxDataHandle;
-extern osMutexId CANRxDataHandle;
 extern CAN_Queue_t canTxQueue;
 extern CAN_Queue_t canRxQueue;
 /* USER CODE END Private defines */

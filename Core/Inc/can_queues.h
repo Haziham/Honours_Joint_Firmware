@@ -4,9 +4,6 @@
 
 #include <stdint.h>
 #include "stm32f0xx_hal.h"
-#include "cmsis_os.h"
-#include "FreeRTOS.h"
-#include "semphr.h"
 
 
 typedef struct
@@ -24,10 +21,9 @@ typedef struct
     uint8_t tail;
     uint8_t count; // Number of CAN_Message_t elements in the queue
     uint8_t size;  // Number of possible CAN_Message_t elements in the queue
-    osMutexId mutex; // Mutex for the queue
 } CAN_Queue_t;
 
-void CAN_queue_init(CAN_Queue_t *queue, CAN_Message_t *data, uint8_t size, osMutexId mutex);
+void CAN_queue_init(CAN_Queue_t *queue, CAN_Message_t *data, uint8_t size);
 
 
 uint8_t CAN_enqueue_message(CAN_Queue_t *queue, CAN_Message_t *message);
