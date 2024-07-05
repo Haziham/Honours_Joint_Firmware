@@ -89,13 +89,17 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
+
+
     osThreadDef(controlSystemHandle, control_system_task, osPriorityNormal, 0, 64);
     controlSystemHandle = osThreadCreate(osThread(controlSystemHandle), NULL);
     osThreadDef(canTransmitHandle, transmit_can_frame_task, osPriorityNormal, 0, 64);
     canTransmitHandle = osThreadCreate(osThread(canTransmitHandle), NULL); 
 
-    // CANTxDataHandle = xSemaphoreCreateMutex();
-    // CANRxDataHandle = xSemaphoreCreateMutex();
+    CANTxDataHandle = xSemaphoreCreateMutex();
+    CANRxDataHandle = xSemaphoreCreateMutex(); //
+
+    CAN_InitQueues();
   /* USER CODE END Init */
 /* USER CODE BEGIN Header */
 /**
@@ -151,7 +155,7 @@ void control_system_task(void const * argument)
     encodeJointSettingsPacketStructure(&canMessage, &jointSettings);
     finishFrecklePacket(&canMessage, getJointSettingsMaxDataLength(), getJointSettingsPacketID());
     CAN_enqueue_message(&canTxQueue, &canMessage);
-    osDelay(5000);
+    osDelay(1000);
   }
   /* USER CODE END control_system_task */
 }
@@ -174,22 +178,26 @@ void transmit_can_frame_task(void const * argument)
   canHeader.IDE = CAN_ID_STD;
   canHeader.RTR = CAN_RTR_DATA;
   uint16_t counter = 0;
+  uint8_t temp = 0 ;
+  HAL_StatusTypeDef error;
   /* Infinite loop */
   for(;;)
   {
 
     __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
-    if(CAN_dequeue_message(&canTxQueue, &canMessage))
+    temp = CAN_dequeue_message(&canTxQueue, &canMessage);
+    if(temp == 0)
     {
       canHeader.StdId = canMessage.id;
       canHeader.DLC = canMessage.len;
-      if (HAL_CAN_AddTxMessage(&hcan, &canHeader, canMessage.data, &txMailbox) != HAL_OK)
+      error = HAL_CAN_AddTxMessage(&hcan, &canHeader, canMessage.data, &txMailbox);
+      if (error != HAL_OK)
       {
         Error_Handler();
       }
     }
     counter += 1000;
-    osDelay(1000);
+    osDelay(500);
     
   }
   /* USER CODE END transmit_can_frame_task */

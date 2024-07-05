@@ -99,7 +99,6 @@ int main(void)
   MX_TIM14_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
-  CAN_InitQueues();
 
   // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
@@ -109,6 +108,7 @@ int main(void)
   HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
 
   __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
+  HAL_CAN_Start(&hcan);
   // __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 40000);
 
   /* USER CODE END 2 */
@@ -166,10 +166,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-
-  /** Enables the Clock Security System
-  */
-  HAL_RCC_EnableCSS();
 }
 
 /* USER CODE BEGIN 4 */

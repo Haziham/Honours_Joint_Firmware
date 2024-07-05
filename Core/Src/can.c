@@ -23,7 +23,7 @@
 /* USER CODE BEGIN 0 */
 
 CAN_Message_t canTxBuffer[CAN_TX_QUEUE_SIZE];
-CAN_Message_t canRxBuffer[CAN_TX_QUEUE_SIZE];
+CAN_Message_t canRxBuffer[CAN_RX_QUEUE_SIZE];
 
 CAN_Queue_t canTxQueue;
 CAN_Queue_t canRxQueue;
@@ -43,10 +43,10 @@ void MX_CAN_Init(void)
 
   /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN;
-  hcan.Init.Prescaler = 16;
+  hcan.Init.Prescaler = 2;
   hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan.Init.TimeSeg1 = CAN_BS1_1TQ;
+  hcan.Init.TimeSeg1 = CAN_BS1_13TQ;
   hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
   hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.AutoBusOff = DISABLE;

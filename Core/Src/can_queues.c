@@ -16,6 +16,7 @@ uint8_t CAN_enqueue_message(CAN_Queue_t *queue, CAN_Message_t *message)
 
     if (CAN_queue_full(queue))
     {
+        xSemaphoreGive(queue->mutex); // Give the mutex
         return ERROR; // Queue is full, return error.
     }
 
@@ -32,7 +33,8 @@ uint8_t CAN_dequeue_message(CAN_Queue_t *queue, CAN_Message_t *message)
     xSemaphoreTake(queue->mutex, portMAX_DELAY); // Take the mutex
     if (CAN_queue_empty(queue))
     {
-        return ERROR; // Queue is empty, return error.
+        xSemaphoreGive(queue->mutex); // Give the mutex
+        return 1; // Queue is empty, return error.
     }
 
     *message = queue->data[queue->head];
@@ -40,7 +42,7 @@ uint8_t CAN_dequeue_message(CAN_Queue_t *queue, CAN_Message_t *message)
     queue->count--;
 
     xSemaphoreGive(queue->mutex); // Give the mutex
-    return SUCCESS; // Success
+    return 0; // Success
 }
 
 

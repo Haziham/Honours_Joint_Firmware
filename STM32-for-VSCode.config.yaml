@@ -10,8 +10,9 @@ target: joint_firmware
 # Can be C or C++
 language: C
 
+# optimization: O
 # optimization: Og
-optimization: Os
+# optimization: Os
 
 # MCU settings
 targetMCU: stm32f0x
