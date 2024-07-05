@@ -22,6 +22,9 @@
 
 /* USER CODE BEGIN 0 */
 
+#include "stm32f0xx_hal_tim.h"
+#include "tim.h"
+
 CAN_Message_t canTxBuffer[CAN_TX_QUEUE_SIZE];
 CAN_Message_t canRxBuffer[CAN_RX_QUEUE_SIZE];
 
@@ -88,6 +91,9 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     GPIO_InitStruct.Alternate = GPIO_AF4_CAN;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+    /* CAN interrupt Init */
+    HAL_NVIC_SetPriority(CEC_CAN_IRQn, 3, 0);
+    HAL_NVIC_EnableIRQ(CEC_CAN_IRQn);
   /* USER CODE BEGIN CAN_MspInit 1 */
 
   /* USER CODE END CAN_MspInit 1 */
@@ -111,6 +117,8 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11|GPIO_PIN_12);
 
+    /* CAN interrupt Deinit */
+    HAL_NVIC_DisableIRQ(CEC_CAN_IRQn);
   /* USER CODE BEGIN CAN_MspDeInit 1 */
 
   /* USER CODE END CAN_MspDeInit 1 */
@@ -123,5 +131,13 @@ void CAN_InitQueues(void)
 {
     CAN_queue_init(&canTxQueue, canTxBuffer, CAN_TX_QUEUE_SIZE, CANTxDataHandle);
     CAN_queue_init(&canRxQueue, canRxBuffer, CAN_RX_QUEUE_SIZE, CANRxDataHandle);
+}
+
+
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+    __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 30000);
+
 }
 /* USER CODE END 1 */
