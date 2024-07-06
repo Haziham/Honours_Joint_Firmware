@@ -109,6 +109,10 @@ int main(void)
 
   __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
   HAL_CAN_Start(&hcan);
+  if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
+  {
+	  Error_Handler();
+  }
   // __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 40000);
 
   /* USER CODE END 2 */
