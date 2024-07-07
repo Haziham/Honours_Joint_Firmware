@@ -1,5 +1,6 @@
 .vscode
 build
+STM32F042F6Px_FLASH.ld
 
 
 # Prerequisites
