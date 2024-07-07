@@ -43,6 +43,7 @@ extern osMutexId CANTxDataHandle;
 extern osMutexId CANRxDataHandle;
 extern CAN_Queue_t canTxQueue;
 extern CAN_Queue_t canRxQueue;
+
 /* USER CODE END Private defines */
 
 void MX_CAN_Init(void);

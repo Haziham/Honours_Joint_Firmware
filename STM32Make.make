@@ -42,6 +42,7 @@ Core/Src/can.c \
 Core/Src/can_queues.c \
 Core/Src/freertos.c \
 Core/Src/gpio.c \
+Core/Src/joint.c \
 Core/Src/main.c \
 Core/Src/spi.c \
 Core/Src/stm32f0xx_hal_msp.c \

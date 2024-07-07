@@ -30,6 +30,8 @@ CAN_Message_t canRxBuffer[CAN_RX_QUEUE_SIZE];
 
 CAN_Queue_t canTxQueue;
 CAN_Queue_t canRxQueue;
+
+
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan;
@@ -160,6 +162,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &canHeader, canMessage.data);
   canMessage.id = canHeader.StdId;
   canMessage.len = canHeader.DLC;
+  joint_decodeCANPackets(&joint, &canMessage);
 
 }
 /* USER CODE END 1 */
