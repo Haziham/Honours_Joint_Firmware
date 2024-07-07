@@ -170,7 +170,7 @@ void control_system_task(void const * argument)
 void transmit_can_frame_task(void const * argument)
 {
   /* USER CODE BEGIN transmit_can_frame_task */
-  __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
+  // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
   CAN_Message_t canMessage;
   CAN_TxHeaderTypeDef canHeader;
   uint32_t txMailbox;
@@ -184,7 +184,7 @@ void transmit_can_frame_task(void const * argument)
   for(;;)
   {
 
-    __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
+    // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
     temp = CAN_dequeue_message(&canTxQueue, &canMessage);
     if(temp == 0)
     {

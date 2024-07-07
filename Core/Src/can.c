@@ -106,7 +106,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* CAN interrupt Init */
-    HAL_NVIC_SetPriority(CEC_CAN_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(CEC_CAN_IRQn, 3, 0);
     HAL_NVIC_EnableIRQ(CEC_CAN_IRQn);
   /* USER CODE BEGIN CAN_MspInit 1 */
 
@@ -148,10 +148,18 @@ void CAN_InitQueues(void)
 }
 
 
-
+uint16_t counter = 0;
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 30000);
+  // static uint16_t counter = 0;
+  counter += 1000;
+  __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
+  // read the message
+  CAN_Message_t canMessage;
+  CAN_RxHeaderTypeDef canHeader;
+  HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &canHeader, canMessage.data);
+  canMessage.id = canHeader.StdId;
+  canMessage.len = canHeader.DLC;
 
 }
 /* USER CODE END 1 */
