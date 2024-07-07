@@ -164,12 +164,12 @@ void control_system_task(void const * argument)
       case CMD_PWM:
         if (joint.command.direction == DIR_FORWARD)
         {
-          __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 0);
-          __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, joint.command.value);
+          __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 65535);
+          __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 65535-joint.command.value);
         }
         else {
-          __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 0);
-          __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, joint.command.value);
+          __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 65535);
+          __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 65535-joint.command.value);
         }
         break;
       case CMD_POSITION:

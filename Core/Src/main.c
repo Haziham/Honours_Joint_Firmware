@@ -97,12 +97,14 @@ int main(void)
   MX_ADC_Init();
   MX_TIM2_Init();
   MX_TIM14_Init();
-  // MX_TIM16_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
 
   // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
   // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 2294967295);
+  HAL_ADCEx_Calibration_Start(&hadc);
+  HAL_ADC_Start(&hadc);
   
   HAL_TIM_PWM_Start(&htim14, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);

@@ -82,6 +82,7 @@ Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
 Middlewares/Third_Party/FreeRTOS/Source/timers.c \
 hlib/canQueue/canQueue.c \
 hlib/freckle/FreckleProtocol.c \
+hlib/freckle/FreckleProtocolInt.c \
 hlib/freckle/fielddecode.c \
 hlib/freckle/fieldencode.c \
 hlib/freckle/freckle_protocol.c \
@@ -223,7 +224,6 @@ vpath %.cpp $(sort $(dir $(CPP_SOURCES)))
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
 
-# list of ASM program objects
 # list of ASM program objects
 UPPER_CASE_ASM_SOURCES = $(filter %.S,$(ASM_SOURCES))
 LOWER_CASE_ASM_SOURCES = $(filter %.s,$(ASM_SOURCES))
