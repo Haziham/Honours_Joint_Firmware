@@ -38,6 +38,7 @@ BUILD_DIR = build
 C_SOURCES =  \
 Core/Src/adc.c \
 Core/Src/can.c \
+Core/Src/dma.c \
 Core/Src/freertos.c \
 Core/Src/gpio.c \
 Core/Src/joint.c \

@@ -21,6 +21,7 @@
 #include "cmsis_os.h"
 #include "adc.h"
 #include "can.h"
+#include "dma.h"
 #include "spi.h"
 #include "tim.h"
 #include "gpio.h"
@@ -60,7 +61,6 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -92,6 +92,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_CAN_Init();
   MX_SPI1_Init();
   MX_ADC_Init();
@@ -103,13 +104,12 @@ int main(void)
   // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
   // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 2294967295);
-  HAL_ADCEx_Calibration_Start(&hadc);
-  HAL_ADC_Start(&hadc);
+  // HAL_ADC_Start(&hadc);
   
   HAL_TIM_PWM_Start(&htim14, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
 
-  __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
+  // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
   HAL_CAN_Start(&hcan);
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
   {
