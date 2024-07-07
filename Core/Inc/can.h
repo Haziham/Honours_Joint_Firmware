@@ -29,7 +29,7 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-#include "can_queues.h"
+#include "canQueue.h"
 #include "cmsis_os.h"
 /* USER CODE END Includes */
 

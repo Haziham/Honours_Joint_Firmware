@@ -25,7 +25,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "can_queues.h"
+// #include "can_queues.h"
+#include "canQueue.h"
 #include "can.h"
 #include "freckle_protocol.h"
 #include "stm32f0xx_hal_tim.h"
@@ -152,10 +153,35 @@ void control_system_task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    encodeJointSettingsPacketStructure(&canMessage, &jointSettings);
-    finishFrecklePacket(&canMessage, getJointSettingsMaxDataLength(), getJointSettingsPacketID());
-    CAN_enqueue_message(&canTxQueue, &canMessage);
-    osDelay(1000);
+    // encodeJointSettingsPacketStructure(&canMessage, &jointSettings);
+    // finishFrecklePacket(&canMessage, getJointSettingsMaxDataLength(), getJointSettingsPacketID());
+    // xSemaphoreTake(CANTxDataHandle, portMAX_DELAY); // Take the mutex
+    // CAN_enqueue_message(&canTxQueue, &canMessage);
+    // xSemaphoreGive(CANTxDataHandle); // Give the mutex
+    // osDelay(1000);
+    switch (joint.command.mode)
+    {
+      case CMD_PWM:
+        if (joint.command.direction == DIR_FORWARD)
+        {
+          __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 0);
+          __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, joint.command.value);
+        }
+        else {
+          __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 0);
+          __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, joint.command.value);
+        }
+        break;
+      case CMD_POSITION:
+        break;
+      case CMD_VELOCITY:
+        break;
+      case CMD_TORQUE:
+        break;
+      default:
+        break;
+    }
+    // osDelay(10);
   }
   /* USER CODE END control_system_task */
 }
@@ -183,9 +209,10 @@ void transmit_can_frame_task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-
     // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
+    xSemaphoreTake(CANTxDataHandle, portMAX_DELAY); // Take the mutex
     temp = CAN_dequeue_message(&canTxQueue, &canMessage);
+    xSemaphoreGive(CANTxDataHandle); // Give the mutex
     if(temp == 0)
     {
       canHeader.StdId = canMessage.id;
@@ -197,7 +224,7 @@ void transmit_can_frame_task(void const * argument)
       }
     }
     counter += 1000;
-    osDelay(500);
+    osDelay(3);
     
   }
   /* USER CODE END transmit_can_frame_task */

@@ -78,6 +78,7 @@ includeDirectories:
   - Core/Src/**
   - Core/Lib/**
   - hlib/freckle/*
+  - hlib/canQueue/*
 
 
 # Files that should be included in the compilation.
@@ -90,6 +91,7 @@ sourceFiles:
   - Core/Src/**
   - Core/Lib/**
   - hlib/freckle/*
+  - hlib/canQueue/*
 
 
 # When no makefile is present it will show a warning pop-up.

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "freckle_protocol.h"
-#include "can_queues.h"
+#include "canQueue.h"
 
 typedef struct {
     JointSettings_t settings;

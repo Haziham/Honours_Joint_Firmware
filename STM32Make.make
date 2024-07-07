@@ -36,10 +36,8 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-Core/Src/FreckleProtocol.c \
 Core/Src/adc.c \
 Core/Src/can.c \
-Core/Src/can_queues.c \
 Core/Src/freertos.c \
 Core/Src/gpio.c \
 Core/Src/joint.c \
@@ -82,6 +80,8 @@ Middlewares/Third_Party/FreeRTOS/Source/queue.c \
 Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c \
 Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
 Middlewares/Third_Party/FreeRTOS/Source/timers.c \
+hlib/canQueue/canQueue.c \
+hlib/freckle/FreckleProtocol.c \
 hlib/freckle/fielddecode.c \
 hlib/freckle/fieldencode.c \
 hlib/freckle/freckle_protocol.c \
@@ -166,6 +166,7 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
 -IMiddlewares/Third_Party/FreeRTOS/Source/include \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 \
+-Ihlib/canQueue \
 -Ihlib/freckle
 
 

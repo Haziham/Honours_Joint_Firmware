@@ -145,8 +145,8 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 
 void CAN_InitQueues(void)
 {
-    CAN_queue_init(&canTxQueue, canTxBuffer, CAN_TX_QUEUE_SIZE, CANTxDataHandle);
-    CAN_queue_init(&canRxQueue, canRxBuffer, CAN_RX_QUEUE_SIZE, CANRxDataHandle);
+    CAN_queue_init(&canTxQueue, canTxBuffer, CAN_TX_QUEUE_SIZE);
+    CAN_queue_init(&canRxQueue, canRxBuffer, CAN_RX_QUEUE_SIZE);
 }
 
 
