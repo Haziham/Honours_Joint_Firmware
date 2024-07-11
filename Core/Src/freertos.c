@@ -196,7 +196,6 @@ void control_system_task(void const * argument)
 void transmit_can_frame_task(void const * argument)
 {
   /* USER CODE BEGIN transmit_can_frame_task */
-  // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
   CAN_Message_t canMessage;
   CAN_TxHeaderTypeDef canHeader;
   uint32_t txMailbox;
@@ -206,11 +205,34 @@ void transmit_can_frame_task(void const * argument)
   uint16_t counter = 0;
   uint8_t temp = 0 ;
   HAL_StatusTypeDef error;
+
+  static uint32_t lastTelemetryTime = 0;
+  uint32_t currentTime;
   /* Infinite loop */
   for(;;)
   {
-    // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
     xSemaphoreTake(CANTxDataHandle, portMAX_DELAY); // Take the mutex
+
+    // Check if we should send some telemetry. This should be another task, but lacking space.
+    currentTime = HAL_GetTick();
+    if ((currentTime - lastTelemetryTime) > joint.telemetrySettings.transmitPeriod)
+    {
+      lastTelemetryTime = currentTime;
+      encodeStatusAPacketStructure(&canMessage, &joint.statusA);
+      finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
+      CAN_enqueue_message(&canTxQueue, &canMessage);
+
+      encodeStatusBPacketStructure(&canMessage, &joint.statusB);
+      finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
+      CAN_enqueue_message(&canTxQueue, &canMessage);
+    }
+
+    // encodeStatusAPacketStructure(&canMessage, &joint.statusA);
+    // finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
+    // CAN_enqueue_message(&canTxQueue, &canMessage);
+
+
+
     temp = CAN_dequeue_message(&canTxQueue, &canMessage);
     xSemaphoreGive(CANTxDataHandle); // Give the mutex
     if(temp == 0)
@@ -225,7 +247,6 @@ void transmit_can_frame_task(void const * argument)
     }
     counter += 1000;
     osDelay(3);
-    
   }
   /* USER CODE END transmit_can_frame_task */
 }

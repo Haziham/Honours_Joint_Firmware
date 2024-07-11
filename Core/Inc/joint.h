@@ -4,7 +4,8 @@
 #include "canQueue.h"
 
 typedef struct {
-    JointSettings_t settings;
+    JointSettings_t jointSettings;
+    TelemetrySettings_t telemetrySettings;
     StatusA_t statusA;
     StatusB_t statusB;
     JointCommand_t command;
