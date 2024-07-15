@@ -47,7 +47,7 @@ extern ADC_HandleTypeDef hadc;
 #define VOLTAGE_BOTTOM_RESISTOR 5000
 
 #define ADC_MAX 4095
-#define ADC_REF 3.3
+#define ADC_REF 3.3f
 /* USER CODE END Private defines */
 
 void MX_ADC_Init(void);

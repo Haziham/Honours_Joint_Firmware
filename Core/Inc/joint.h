@@ -2,6 +2,8 @@
 
 #include "freckle_protocol.h"
 #include "canQueue.h"
+#include "main.h"
+#include "can.h"
 
 typedef struct {
     JointSettings_t jointSettings;
@@ -9,9 +11,11 @@ typedef struct {
     StatusA_t statusA;
     StatusB_t statusB;
     JointCommand_t command;
+    CommandSettings_t commandSettings;
 } Joint_t;
 
 extern Joint_t joint;
 
 
-void joint_decodeCANPackets(Joint_t* joint, CAN_Message_t* canMessage); 
+void joint_decodeCANPackets(CAN_Message_t* canMessage); 
+void send_requestedPacket(CAN_Message_t *canMessage);

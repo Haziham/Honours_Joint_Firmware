@@ -31,6 +31,7 @@
 #include "freckle_protocol.h"
 #include "stm32f0xx_hal_tim.h"
 #include "tim.h"
+#include "adc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -159,28 +160,43 @@ void control_system_task(void const * argument)
     // CAN_enqueue_message(&canTxQueue, &canMessage);
     // xSemaphoreGive(CANTxDataHandle); // Give the mutex
     // osDelay(1000);
-    switch (joint.command.mode)
+    uint16_t pwm0;
+    uint16_t pwm1;
+    if (joint.statusA.enabled)
     {
-      case CMD_PWM:
-        if (joint.command.direction == DIR_FORWARD)
-        {
-          __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 65535);
-          __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 65535-joint.command.value);
-        }
-        else {
-          __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 65535);
-          __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 65535-joint.command.value);
-        }
-        break;
-      case CMD_POSITION:
-        break;
-      case CMD_VELOCITY:
-        break;
-      case CMD_TORQUE:
-        break;
-      default:
-        break;
+      switch (joint.commandSettings.mode)
+      {
+        case CMD_PWM:
+          if (joint.command.direction == DIR_FORWARD)
+          {
+
+            pwm0 = 65535;
+            pwm1 = 65535-joint.command.value;
+          }
+          else {
+            pwm0 = 65535-joint.command.value;
+            pwm1 = 65535;
+          }
+          break;
+        case CMD_POSITION:
+        case CMD_VELOCITY:
+        case CMD_TORQUE:
+        default:
+          pwm0 = 65535;
+          pwm1 = 65535;
+          break;
+      }
     }
+    else {
+      pwm0 = 65535;
+      pwm1 = 65535;
+    }
+
+    __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, pwm0);
+    __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, pwm1);
+    joint.statusB.current = getCurrent();
+    joint.statusB.voltage = getVoltage();
+    joint.statusB.externalADC = getExternalVoltage();
     // osDelay(10);
   }
   /* USER CODE END control_system_task */

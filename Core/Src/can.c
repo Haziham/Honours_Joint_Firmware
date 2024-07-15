@@ -155,14 +155,16 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
   // static uint16_t counter = 0;
   counter += 1000;
-  __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
+  // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, counter);
   // read the message
   CAN_Message_t canMessage;
   CAN_RxHeaderTypeDef canHeader;
   HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &canHeader, canMessage.data);
   canMessage.id = canHeader.StdId;
   canMessage.len = canHeader.DLC;
-  joint_decodeCANPackets(&joint, &canMessage);
+  joint_decodeCANPackets(&canMessage);
 
 }
+
+void HAL_CAN_
 /* USER CODE END 1 */

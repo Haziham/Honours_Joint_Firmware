@@ -91,14 +91,14 @@ void MX_ADC_Init(void)
   /* USER CODE BEGIN ADC_Init 2 */
 
   HAL_ADCEx_Calibration_Start(&hadc);
-  HAL_ADC_Start_DMA(&hadc, (uint32_t *)adcBuffer, 2);
+  HAL_ADC_Start_DMA(&hadc, (uint32_t *)adcBuffer, 3);
   /* USER CODE END ADC_Init 2 */
 
 }
 
 float getVoltage()
 { 
-  return (VOLTAGE_BOTTOM_RESISTOR/VOLTAGE_TOP_RESISTOR) * (adcBuffer[VOLTAGE_ADC] * ADC_REF / ADC_MAX;
+  return ((VOLTAGE_TOP_RESISTOR+VOLTAGE_BOTTOM_RESISTOR)/VOLTAGE_BOTTOM_RESISTOR) * (adcBuffer[VOLTAGE_ADC] * ADC_REF / ADC_MAX);
 }
 
 float getCurrent()

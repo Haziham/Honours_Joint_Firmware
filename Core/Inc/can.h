@@ -39,8 +39,6 @@ extern CAN_HandleTypeDef hcan;
 #define CAN_TX_QUEUE_SIZE 16
 #define CAN_RX_QUEUE_SIZE 16
 
-extern osMutexId CANTxDataHandle;
-extern osMutexId CANRxDataHandle;
 extern CAN_Queue_t canTxQueue;
 extern CAN_Queue_t canRxQueue;
 

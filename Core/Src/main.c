@@ -109,11 +109,11 @@ int main(void)
   HAL_TIM_PWM_Start(&htim14, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
 
-  joint.telemetrySettings.transmitPeriod = 1000;
+  joint.telemetrySettings.transmitPeriod = 10000;
 
   // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
   HAL_CAN_Start(&hcan);
-  if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
+  if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_RX_FIFO0_OVERRUN) != HAL_OK)
   {
 	  Error_Handler();
   }
