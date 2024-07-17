@@ -167,5 +167,22 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
   joint.statusA.error = 1;
 }
 
+void CAN_SendMessage(CAN_Message_t *canMessage)
+{
+  CAN_TxHeaderTypeDef canHeader;
+  uint32_t txMailbox;
+  HAL_StatusTypeDef error;
+  canHeader.IDE = CAN_ID_STD;
+  canHeader.RTR = CAN_RTR_DATA;
+
+  canHeader.StdId = canMessage->id;
+  canHeader.DLC = canMessage->len;
+  error = HAL_CAN_AddTxMessage(&hcan, &canHeader, canMessage->data, &txMailbox);
+  if (error != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
 // void HAL_CAN_
 /* USER CODE END 1 */

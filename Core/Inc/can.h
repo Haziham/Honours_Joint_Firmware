@@ -49,7 +49,7 @@ void MX_CAN_Init(void);
 /* USER CODE BEGIN Prototypes */
 
 void CAN_InitQueues(void);
-
+void CAN_SendMessage(CAN_Message_t *canMessage);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

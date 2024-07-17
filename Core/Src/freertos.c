@@ -214,11 +214,8 @@ void transmit_can_frame_task(void const * argument)
 {
   /* USER CODE BEGIN transmit_can_frame_task */
   CAN_Message_t canMessage;
-  CAN_TxHeaderTypeDef canHeader;
   uint32_t txMailbox;
 
-  canHeader.IDE = CAN_ID_STD;
-  canHeader.RTR = CAN_RTR_DATA;
   uint16_t counter = 0;
   uint8_t temp = 0 ;
   HAL_StatusTypeDef error;
@@ -255,13 +252,7 @@ void transmit_can_frame_task(void const * argument)
       temp = CAN_dequeue_message(&canTxQueue, &canMessage);
       if(temp == 0)
       {
-        canHeader.StdId = canMessage.id;
-        canHeader.DLC = canMessage.len;
-        error = HAL_CAN_AddTxMessage(&hcan, &canHeader, canMessage.data, &txMailbox);
-        if (error != HAL_OK)
-        {
-          Error_Handler();
-        }
+        CAN_SendMessage(&canMessage);
       }
     }
     osMutexRelease(CANTxDataHandle); // Give the mutex
@@ -269,43 +260,6 @@ void transmit_can_frame_task(void const * argument)
     osDelay(3);
   }
   /* USER CODE END transmit_can_frame_task */
-}
-
-void send_requestedPacket(CAN_Message_t *canMessage)
-{
-    // May need to optermise this for space
-    // Can make use of the fact all settings is just a block of data
-    switch (canMessage->id)
-    {
-    case PKT_JOINT_COMMAND:
-        encodeJointCommandPacketStructure(canMessage, &joint.command);
-        break;
-    case PKT_JOINT_SETTINGS:
-        encodeJointSettingsPacketStructure(canMessage, &joint.jointSettings);
-        break;
-    case PKT_STATUSA:
-        encodeStatusAPacketStructure(canMessage, &joint.statusA);
-        break;
-    case PKT_STATUSB:
-        encodeStatusBPacketStructure(canMessage, &joint.statusB);
-        break;
-    case PKT_TELEMETRY_SETTINGS:
-        encodeTelemetrySettingsPacketStructure(canMessage, &joint.telemetrySettings);
-        break;
-    case PKT_COMMAND_SETTINGS:
-        encodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings);
-        break;
-    default:
-        break;
-        joint.statusA.error = 1;
-        return;
-    }
-
-    if (osMutexWait(CANTxDataHandle, osWaitForever) == osOK)
-    {
-      CAN_enqueue_message(&canTxQueue, canMessage);    
-    }
-    osMutexRelease(CANTxDataHandle);
 }
 
 /* Private application code --------------------------------------------------*/
