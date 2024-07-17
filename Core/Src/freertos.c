@@ -32,6 +32,7 @@
 #include "stm32f0xx_hal_tim.h"
 #include "tim.h"
 #include "adc.h"
+#include "joint.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -197,7 +198,7 @@ void control_system_task(void const * argument)
     joint.statusB.current = getCurrent();
     joint.statusB.voltage = getVoltage();
     joint.statusB.externalADC = getExternalVoltage();
-    // osDelay(10);
+    osDelay(10);
   }
   /* USER CODE END control_system_task */
 }
@@ -227,44 +228,84 @@ void transmit_can_frame_task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    xSemaphoreTake(CANTxDataHandle, portMAX_DELAY); // Take the mutex
-
-    // Check if we should send some telemetry. This should be another task, but lacking space.
-    currentTime = HAL_GetTick();
-    if ((currentTime - lastTelemetryTime) > joint.telemetrySettings.transmitPeriod)
+    // xSemaphoreTake(CANTxDataHandle, portMAX_DELAY); // Take the mutex
+    if (osMutexWait(CANTxDataHandle, osWaitForever) == osOK)
     {
-      lastTelemetryTime = currentTime;
-      encodeStatusAPacketStructure(&canMessage, &joint.statusA);
-      finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
-      CAN_enqueue_message(&canTxQueue, &canMessage);
 
-      encodeStatusBPacketStructure(&canMessage, &joint.statusB);
-      finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
-      CAN_enqueue_message(&canTxQueue, &canMessage);
-    }
+      // Check if we should send some telemetry. This should be another task, but lacking space.
+      // currentTime = HAL_GetTick();
+      // if ((currentTime - lastTelemetryTime) > joint.telemetrySettings.transmitPeriod)
+      // {
+      //   lastTelemetryTime = currentTime;
+      //   encodeStatusAPacketStructure(&canMessage, &joint.statusA);
+      //   finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
+      //   CAN_enqueue_message(&canTxQueue, &canMessage);
 
-    // encodeStatusAPacketStructure(&canMessage, &joint.statusA);
-    // finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
-    // CAN_enqueue_message(&canTxQueue, &canMessage);
+      //   encodeStatusBPacketStructure(&canMessage, &joint.statusB);
+      //   finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
+      //   CAN_enqueue_message(&canTxQueue, &canMessage);
+      // }
+
+      // encodeStatusAPacketStructure(&canMessage, &joint.statusA);
+      // finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
+      // CAN_enqueue_message(&canTxQueue, &canMessage);
+      osDelay(1);
 
 
-
-    temp = CAN_dequeue_message(&canTxQueue, &canMessage);
-    xSemaphoreGive(CANTxDataHandle); // Give the mutex
-    if(temp == 0)
-    {
-      canHeader.StdId = canMessage.id;
-      canHeader.DLC = canMessage.len;
-      error = HAL_CAN_AddTxMessage(&hcan, &canHeader, canMessage.data, &txMailbox);
-      if (error != HAL_OK)
+      temp = CAN_dequeue_message(&canTxQueue, &canMessage);
+      if(temp == 0)
       {
-        Error_Handler();
+        canHeader.StdId = canMessage.id;
+        canHeader.DLC = canMessage.len;
+        error = HAL_CAN_AddTxMessage(&hcan, &canHeader, canMessage.data, &txMailbox);
+        if (error != HAL_OK)
+        {
+          Error_Handler();
+        }
       }
     }
+    osMutexRelease(CANTxDataHandle); // Give the mutex
     counter += 1000;
     osDelay(3);
   }
   /* USER CODE END transmit_can_frame_task */
+}
+
+void send_requestedPacket(CAN_Message_t *canMessage)
+{
+    // May need to optermise this for space
+    // Can make use of the fact all settings is just a block of data
+    switch (canMessage->id)
+    {
+    case PKT_JOINT_COMMAND:
+        encodeJointCommandPacketStructure(canMessage, &joint.command);
+        break;
+    case PKT_JOINT_SETTINGS:
+        encodeJointSettingsPacketStructure(canMessage, &joint.jointSettings);
+        break;
+    case PKT_STATUSA:
+        encodeStatusAPacketStructure(canMessage, &joint.statusA);
+        break;
+    case PKT_STATUSB:
+        encodeStatusBPacketStructure(canMessage, &joint.statusB);
+        break;
+    case PKT_TELEMETRY_SETTINGS:
+        encodeTelemetrySettingsPacketStructure(canMessage, &joint.telemetrySettings);
+        break;
+    case PKT_COMMAND_SETTINGS:
+        encodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings);
+        break;
+    default:
+        break;
+        joint.statusA.error = 1;
+        return;
+    }
+
+    if (osMutexWait(CANTxDataHandle, osWaitForever) == osOK)
+    {
+      CAN_enqueue_message(&canTxQueue, canMessage);    
+    }
+    osMutexRelease(CANTxDataHandle);
 }
 
 /* Private application code --------------------------------------------------*/

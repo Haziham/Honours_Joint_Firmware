@@ -22,6 +22,7 @@
 #include "stm32f0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "joint.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -137,11 +138,9 @@ void TIM17_IRQHandler(void)
 void CEC_CAN_IRQHandler(void)
 {
   /* USER CODE BEGIN CEC_CAN_IRQn 0 */
-
   /* USER CODE END CEC_CAN_IRQn 0 */
   HAL_CAN_IRQHandler(&hcan);
   /* USER CODE BEGIN CEC_CAN_IRQn 1 */
-
   /* USER CODE END CEC_CAN_IRQn 1 */
 }
 

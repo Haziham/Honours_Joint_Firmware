@@ -8,7 +8,7 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
     if (canMessage->len == 0)
     {
         // Its a packet request 
-        // send_requestedPacket(canMessage); 
+        send_requestedPacket(canMessage); 
     }
     else if (decodeJointCommandPacketStructure(canMessage, &joint.command) |
         decodeJointSettingsPacketStructure(canMessage, &joint.jointSettings) |
@@ -23,37 +23,3 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
     }
 }
 
-void send_requestedPacket(CAN_Message_t *canMessage)
-{
-    // May need to optermise this for space
-    // Can make use of the fact all settings is just a block of data
-    switch (canMessage->id)
-    {
-    case PKT_JOINT_COMMAND:
-        encodeJointCommandPacketStructure(canMessage, &joint.command);
-        break;
-    case PKT_JOINT_SETTINGS:
-        encodeJointSettingsPacketStructure(canMessage, &joint.jointSettings);
-        break;
-    case PKT_STATUSA:
-        encodeStatusAPacketStructure(canMessage, &joint.statusA);
-        break;
-    case PKT_STATUSB:
-        encodeStatusBPacketStructure(canMessage, &joint.statusB);
-        break;
-    case PKT_TELEMETRY_SETTINGS:
-        encodeTelemetrySettingsPacketStructure(canMessage, &joint.telemetrySettings);
-        break;
-    case PKT_COMMAND_SETTINGS:
-        encodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings);
-        break;
-    default:
-        break;
-        joint.statusA.error = 1;
-        return;
-    }
-
-    xSemaphoreTake(CANTxDataHandle, portMAX_DELAY); // Take the mutex
-    CAN_enqueue_message(&canTxQueue, canMessage);    
-    xSemaphoreGive(CANTxDataHandle); // Give the mutex
-}
