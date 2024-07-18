@@ -1,4 +1,5 @@
 #include "ref.h"
+#include "pid.h"
 
 float32_t ref_pid_f32(
 	arm_pid_instance_f32 * S,

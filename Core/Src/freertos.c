@@ -33,6 +33,7 @@
 #include "tim.h"
 #include "adc.h"
 #include "joint.h"
+#include "pid.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -143,63 +144,78 @@ void control_system_task(void const * argument)
 {
   /* USER CODE BEGIN control_system_task */
   // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
-  JointSettings_t jointSettings;
-  jointSettings.jointType = JOINT_HIP_YAW;
-  jointSettings.legNumber = 0;
-  jointSettings.maxAngle = 8.9;
-  jointSettings.minAngle = 6.7;
-  jointSettings.nodeId = 5;
 
-  CAN_Message_t canMessage;  
+  int16_t currentPosition = 0;
+  int16_t previousPosition = 0;
+  int16_t deltaPosition = 0;
+  uint32_t currentTimeMs = 0;
+  uint32_t previousTimeMs = 0;
+  int32_t deltaTimeMs = 0;
+
 
   /* Infinite loop */
   for(;;)
   {
+    currentPosition = __HAL_TIM_GET_COUNTER(&htim2);
+    deltaPosition = currentPosition - previousPosition;
+
+    currentTimeMs = HAL_GetTick();
+    deltaTimeMs = currentTimeMs - previousTimeMs;
+
+    convert_countToAngle(&joint.statusA.position, currentPosition);
+    convert_countToAngle(&joint.statusA.velocity, (deltaPosition*1000)/deltaTimeMs); 
+
+    joint.statusA.moving = deltaPosition != 0;
+    joint.statusA.direction = joint.statusA.velocity > 0;
+
+
     // encodeJointSettingsPacketStructure(&canMessage, &jointSettings);
     // finishFrecklePacket(&canMessage, getJointSettingsMaxDataLength(), getJointSettingsPacketID());
     // xSemaphoreTake(CANTxDataHandle, portMAX_DELAY); // Take the mutex
     // CAN_enqueue_message(&canTxQueue, &canMessage);
     // xSemaphoreGive(CANTxDataHandle); // Give the mutex
     // osDelay(1000);
-    uint16_t pwm0;
-    uint16_t pwm1;
+    uint32_t pwm = 0;
+    uint8_t offset = 0;
     if (joint.statusA.enabled)
     {
       switch (joint.commandSettings.mode)
       {
         case CMD_PWM:
-          if (joint.command.direction == DIR_FORWARD)
-          {
-
-            pwm0 = 65535;
-            pwm1 = 65535-joint.command.value;
-          }
-          else {
-            pwm0 = 65535-joint.command.value;
-            pwm1 = 65535;
-          }
+          pwm = joint.command.value;
+          offset = 1;
           break;
         case CMD_POSITION:
+          pwm = PID_calculate(&positionPID, joint.command.value, joint.statusA.position);
+          // joint.statusC.debugValue = joint.command.value;
+          joint.statusC.debugValue = pwm;
+          offset  = 1;
+          // joint.statusC.debugValue = joint.command.value - joint.statusA.position;
+          break;
         case CMD_VELOCITY:
         case CMD_TORQUE:
         default:
-          pwm0 = 65535;
-          pwm1 = 65535;
+          pwm = 0;
           break;
       }
     }
     else {
-      pwm0 = 65535;
-      pwm1 = 65535;
+      pwm = 0;
+      offset = 0;
       joint.command.value = 0;
     }
 
-    __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, pwm0);
-    __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, pwm1);
+
+    set_motorPWM(pwm, offset);
     joint.statusB.current = getCurrent();
     joint.statusB.voltage = getVoltage();
     joint.statusB.externalADC = getExternalVoltage();
-    osDelay(10);
+    // joint.statusC.debugValue = deltaTimeMs;
+
+
+    previousPosition = currentPosition;
+    previousTimeMs = currentTimeMs;
+    osDelay(1);
   }
   /* USER CODE END control_system_task */
 }
@@ -215,11 +231,9 @@ void transmit_can_frame_task(void const * argument)
 {
   /* USER CODE BEGIN transmit_can_frame_task */
   CAN_Message_t canMessage;
-  uint32_t txMailbox;
 
   uint16_t counter = 0;
   uint8_t temp = 0 ;
-  HAL_StatusTypeDef error;
 
   static uint32_t lastTelemetryTime = 0;
   uint32_t currentTime;
@@ -241,11 +255,11 @@ void transmit_can_frame_task(void const * argument)
         encodeStatusBPacketStructure(&canMessage, &joint.statusB);
         finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
         CAN_enqueue_message(&canTxQueue, &canMessage);
-      }
 
-      encodeStatusAPacketStructure(&canMessage, &joint.statusA);
-      finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
-      CAN_enqueue_message(&canTxQueue, &canMessage);
+        encodeStatusCPacketStructure(&canMessage, &joint.statusC);
+        finishFrecklePacket(&canMessage, getStatusCMaxDataLength(), getStatusCPacketID());
+        CAN_enqueue_message(&canTxQueue, &canMessage);
+      }
 
       temp = CAN_dequeue_message(&canTxQueue, &canMessage);
       if(temp == 0)

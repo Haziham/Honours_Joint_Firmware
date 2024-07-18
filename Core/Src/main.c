@@ -28,7 +28,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +60,9 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+PID_t positionPID;
+
 /* USER CODE END 0 */
 
 /**
@@ -94,25 +96,28 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_CAN_Init();
-  MX_SPI1_Init();
+  // MX_SPI1_init();
   MX_ADC_Init();
   MX_TIM2_Init();
   MX_TIM14_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
 
-  // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-  // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 2294967295);
-  // HAL_ADC_Start(&hadc);
   
   HAL_TIM_PWM_Start(&htim14, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  HAL_CAN_Start(&hcan);
+
+
+  PID_init(&positionPID, 650, 500, 120, 0.001, -65535, 65535); 
 
   joint.telemetrySettings.transmitPeriod = 10;
+  joint.jointSettings.gearRatio = 379;
+
+  
 
   // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
-  HAL_CAN_Start(&hcan);
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | 
                                           CAN_IT_ERROR | 
                                           CAN_IT_RX_FIFO0_OVERRUN |
@@ -121,6 +126,11 @@ int main(void)
   {
 	  Error_Handler();
   }
+
+
+
+
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */

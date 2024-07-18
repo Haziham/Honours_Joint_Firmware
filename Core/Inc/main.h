@@ -33,12 +33,14 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include "joint.h"
 #include "cmsis_os.h"
+#include "pid.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 extern osMutexId CANTxDataHandle;
 extern osMutexId CANRxDataHandle;
+extern PID_t positionPID;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
