@@ -191,6 +191,7 @@ void control_system_task(void const * argument)
     else {
       pwm0 = 65535;
       pwm1 = 65535;
+      joint.command.value = 0;
     }
 
     __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, pwm0);
@@ -225,29 +226,26 @@ void transmit_can_frame_task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    // xSemaphoreTake(CANTxDataHandle, portMAX_DELAY); // Take the mutex
     if (osMutexWait(CANTxDataHandle, osWaitForever) == osOK)
     {
 
       // Check if we should send some telemetry. This should be another task, but lacking space.
-      // currentTime = HAL_GetTick();
-      // if ((currentTime - lastTelemetryTime) > joint.telemetrySettings.transmitPeriod)
-      // {
-      //   lastTelemetryTime = currentTime;
-      //   encodeStatusAPacketStructure(&canMessage, &joint.statusA);
-      //   finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
-      //   CAN_enqueue_message(&canTxQueue, &canMessage);
+      currentTime = HAL_GetTick();
+      if ((currentTime - lastTelemetryTime) > joint.telemetrySettings.transmitPeriod)
+      {
+        lastTelemetryTime = currentTime;
+        encodeStatusAPacketStructure(&canMessage, &joint.statusA);
+        finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
+        CAN_enqueue_message(&canTxQueue, &canMessage);
 
-      //   encodeStatusBPacketStructure(&canMessage, &joint.statusB);
-      //   finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
-      //   CAN_enqueue_message(&canTxQueue, &canMessage);
-      // }
+        encodeStatusBPacketStructure(&canMessage, &joint.statusB);
+        finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
+        CAN_enqueue_message(&canTxQueue, &canMessage);
+      }
 
-      // encodeStatusAPacketStructure(&canMessage, &joint.statusA);
-      // finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
-      // CAN_enqueue_message(&canTxQueue, &canMessage);
-      osDelay(1);
-
+      encodeStatusAPacketStructure(&canMessage, &joint.statusA);
+      finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
+      CAN_enqueue_message(&canTxQueue, &canMessage);
 
       temp = CAN_dequeue_message(&canTxQueue, &canMessage);
       if(temp == 0)
