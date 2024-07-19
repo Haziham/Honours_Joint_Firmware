@@ -96,20 +96,6 @@ void MX_ADC_Init(void)
 
 }
 
-float getVoltage()
-{ 
-  return ((VOLTAGE_TOP_RESISTOR+VOLTAGE_BOTTOM_RESISTOR)/VOLTAGE_BOTTOM_RESISTOR) * (adcBuffer[VOLTAGE_ADC] * ADC_REF / ADC_MAX);
-}
-
-float getCurrent()
-{
-    return (adcBuffer[CURRENT_ADC] * ADC_REF / ADC_MAX) / CURRENT_SENSE_GAIN / CURRENT_SENSE_RESISTOR;
-}
-
-float getExternalVoltage()
-{
-    return 20.5f;
-}
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
 {
@@ -185,4 +171,18 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
 /* USER CODE BEGIN 1 */
 
+float getVoltage()
+{ 
+  return ((VOLTAGE_TOP_RESISTOR+VOLTAGE_BOTTOM_RESISTOR)/VOLTAGE_BOTTOM_RESISTOR) * (adcBuffer[VOLTAGE_ADC] * ADC_REF / ADC_MAX);
+}
+
+float getCurrent()
+{
+    return (adcBuffer[CURRENT_ADC] * ADC_REF / ADC_MAX) / CURRENT_SENSE_GAIN / CURRENT_SENSE_RESISTOR;
+}
+
+float getExternalVoltage()
+{
+    return 20.5f;
+}
 /* USER CODE END 1 */
