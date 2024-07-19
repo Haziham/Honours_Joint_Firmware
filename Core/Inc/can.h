@@ -30,7 +30,6 @@ extern "C" {
 
 /* USER CODE BEGIN Includes */
 #include "canQueue.h"
-#include "cmsis_os.h"
 /* USER CODE END Includes */
 
 extern CAN_HandleTypeDef hcan;

@@ -1,6 +1,5 @@
 #include "joint.h"
 #include "tim.h"
-#include "cmsis_os.h"
 
 Joint_t joint;
 
