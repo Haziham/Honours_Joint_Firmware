@@ -110,7 +110,8 @@ int main(void)
   HAL_CAN_Start(&hcan);
 
 
-  PID_init(&positionPID, 650, 500, 120, 0.001, -65535, 65535); 
+  // PID_init(&positionPID, 650, 500, 120, 0.001, -65535, 65535); 
+  PID_init(&positionPID, 100, 0, 0, 0.001, -65535, 65535); 
 
   joint.telemetrySettings.transmitPeriod = 10;
   joint.jointSettings.gearRatio = 379;
@@ -129,7 +130,9 @@ int main(void)
 
 
 
-
+  // HAL_SPI_Receive()
+  // HAL_SPI_Transmit()
+  // HAL_SPI_TransmitReceive()
 
   /* USER CODE END 2 */
 

@@ -87,3 +87,15 @@ void set_motorPWM(int32_t pwm, uint8_t offset)
     }
 
 }
+
+void save_settings(void)
+{
+
+    HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, 100);
+    HAL_SPI_Transmit(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100);
+
+}
+
+void load_settings(void)
+{
+}

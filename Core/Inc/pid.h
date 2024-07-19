@@ -3,15 +3,15 @@
 #include <stdint.h>
 
 typedef struct {
-    double Kp;
-    double Ki;
-    double Kd;
-    double Ts;
-    double previousError;
-    double sumError;
-    double maxOutput;
-    double minOutput;
+    float Kp;
+    float Ki;
+    float Kd;
+    float Ts;
+    float previousError;
+    float sumError;
+    float maxOutput;
+    float minOutput;
 } PID_t;
 
-void PID_init(PID_t *pid, double Kp, double Ki, double Kd, double Ts, double minOutput, double maxOutput);
-double PID_calculate(PID_t *pid, int setpoint, int feedback);
+void PID_init(PID_t *pid, float Kp, float Ki, float Kd, float Ts, float minOutput, float maxOutput);
+float PID_calculate(PID_t *pid, int setpoint, int feedback);

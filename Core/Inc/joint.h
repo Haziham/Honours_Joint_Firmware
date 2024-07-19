@@ -4,6 +4,8 @@
 #include "canQueue.h"
 #include "main.h"
 #include "can.h"
+#include "spi.h"
+#include "AT25DF011.h"
 
 #define ENCODER_CPR 6 
 
@@ -33,3 +35,7 @@ void send_requestedPacket(CAN_Message_t *canMessage);
 
 void convert_countToAngle(int16_t *angle, int16_t count);
 void set_motorPWM(int32_t pwm, uint8_t offset);
+
+
+void save_settings(void);
+void load_settings(void);
