@@ -190,6 +190,130 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void control_system_task()
+{
+  int16_t currentPosition = 0;
+  int16_t previousPosition = 0;
+  int16_t deltaPosition = 0;
+  uint32_t currentTimeMs = 0;
+  static uint32_t previousTimeMs = 0;
+  int32_t deltaTimeMs = 0;
+
+  currentTimeMs = HAL_GetTick();
+  deltaTimeMs = currentTimeMs - previousTimeMs;
+
+  if (deltaTimeMs < 1)
+  {
+    return;
+  }
+
+  currentPosition = __HAL_TIM_GET_COUNTER(&htim2);
+  deltaPosition = currentPosition - previousPosition;
+
+
+  convert_countToAngle(&joint.statusA.position, currentPosition);
+  convert_countToAngle(&joint.statusA.velocity, (deltaPosition*1000)/deltaTimeMs); 
+
+  joint.statusA.moving = deltaPosition != 0;
+  joint.statusA.direction = joint.statusA.velocity > 0;
+
+  uint32_t pwm = 0;
+  uint8_t offset = 0;
+  if (joint.statusA.enabled)
+  {
+    switch (joint.commandSettings.mode)
+    {
+      case CMD_PWM:
+        pwm = joint.command.value;
+        offset = 1;
+        break;
+      case CMD_POSITION:
+        pwm = PID_calculate(&positionPID, joint.command.value, joint.statusA.position);
+        // joint.statusC.debugValue = joint.command.value;
+        joint.statusC.debugValue = pwm;
+        offset  = 1;
+        // joint.statusC.debugValue = joint.command.value - joint.statusA.position;
+        break;
+      case CMD_VELOCITY:
+      case CMD_TORQUE:
+      default:
+        pwm = 0;
+        break;
+    }
+  }
+  else {
+    pwm = 0;
+    offset = 0;
+    joint.command.value = 0;
+  }
+
+
+  set_motorPWM(pwm, offset);
+  joint.statusB.current = getCurrent();
+  joint.statusB.voltage = getVoltage();
+  joint.statusB.externalADC = getExternalVoltage();
+  // joint.statusC.debugValue = deltaTimeMs;
+
+
+  previousPosition = currentPosition;
+  previousTimeMs = currentTimeMs;
+}
+
+void transmit_can_frame_task()
+{
+  CAN_Message_t canMessage;
+
+  uint32_t currentTimeMs = 0;
+  static uint32_t previousTimeMs = 0;
+  int32_t deltaTimeMs = 0;
+
+  currentTimeMs = HAL_GetTick();
+  deltaTimeMs = currentTimeMs - previousTimeMs;
+
+  if (deltaTimeMs < 3)
+  {
+    return;
+  }
+
+  if(CAN_dequeue_message(&canTxQueue, &canMessage))
+  {
+    CAN_SendMessage(&canMessage);
+  }
+
+  previousTimeMs = currentTimeMs;
+}
+
+void transmit_telemetry_task()
+{
+  uint32_t currentTimeMs = 0;
+  static uint32_t previousTimeMs = 0;
+  int32_t deltaTimeMs = 0;
+  CAN_Message_t canMessage;
+
+  currentTimeMs = HAL_GetTick();
+  deltaTimeMs = currentTimeMs - previousTimeMs;
+
+  if (deltaTimeMs < 3)
+  {
+    return;
+  }
+
+  encodeStatusAPacketStructure(&canMessage, &joint.statusA);
+  finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
+  CAN_enqueue_message(&canTxQueue, &canMessage);
+
+  encodeStatusBPacketStructure(&canMessage, &joint.statusB);
+  finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
+  CAN_enqueue_message(&canTxQueue, &canMessage);
+
+  encodeStatusCPacketStructure(&canMessage, &joint.statusC);
+  finishFrecklePacket(&canMessage, getStatusCMaxDataLength(), getStatusCPacketID());
+  CAN_enqueue_message(&canTxQueue, &canMessage);
+
+  previousTimeMs = currentTimeMs;
+}
+
+
 /* USER CODE END 4 */
 
 /**
