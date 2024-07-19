@@ -116,7 +116,7 @@ int main(void)
   joint.telemetrySettings.transmitPeriod = 10;
   joint.jointSettings.gearRatio = 379;
 
-  
+  load_settings();  
 
   // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | 

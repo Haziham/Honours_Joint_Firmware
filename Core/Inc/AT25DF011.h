@@ -10,8 +10,8 @@
 #define READ_COMMAND_SIZE 5
 #define TRANSMIT_COMMAND_SIZE 4
 
-const uint8_t readCommand[READ_COMMAND_SIZE] = {OP_READ_ARRAY, 0x00, 0x00, 0x00, 0x00};
-const uint8_t transmitCommand[TRANSMIT_COMMAND_SIZE] = {OP_WRITE_ARRAY, 0x00, 0x00, 0x00};
+extern const uint8_t readCommand[READ_COMMAND_SIZE];
+extern const uint8_t transmitCommand[TRANSMIT_COMMAND_SIZE];
 
 #define spi_flash_select() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_RESET)
-
+#define spi_flash_deselect() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_SET)

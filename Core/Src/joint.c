@@ -12,12 +12,12 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
         send_requestedPacket(canMessage); 
     }
     else if (decodeJointCommandPacketStructure(canMessage, &joint.command) |
-        decodeJointSettingsPacketStructure(canMessage, &joint.jointSettings) |
-        decodeStatusAPacketStructure(canMessage, &joint.statusA) |
-        decodeStatusBPacketStructure(canMessage, &joint.statusB) |
+        decodeEnablePacket(canMessage, &joint.statusA.enabled)) {}
+    else if ( decodeJointSettingsPacketStructure(canMessage, &joint.jointSettings) |
         decodeTelemetrySettingsPacketStructure(canMessage, &joint.telemetrySettings) |
-        decodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings)  |
-        decodeEnablePacket(canMessage, &joint.statusA.enabled));
+        decodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings)) {
+        save_settings();
+        }
     else
     {
         joint.statusA.error = 1;
@@ -90,12 +90,16 @@ void set_motorPWM(int32_t pwm, uint8_t offset)
 
 void save_settings(void)
 {
-
+    spi_flash_select();
     HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, 100);
     HAL_SPI_Transmit(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100);
-
+    spi_flash_deselect();
 }
 
 void load_settings(void)
 {
+    spi_flash_select();
+    HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, 100);
+    HAL_SPI_Receive(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100);
+    spi_flash_deselect();
 }

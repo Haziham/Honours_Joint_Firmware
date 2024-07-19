@@ -96,7 +96,6 @@ void MX_ADC_Init(void)
 
 }
 
-
 void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
 {
 

@@ -36,6 +36,7 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
+Core/Src/AT25DF011.c \
 Core/Src/adc.c \
 Core/Src/can.c \
 Core/Src/dma.c \
