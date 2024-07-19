@@ -15,19 +15,32 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
         decodeEnablePacket(canMessage, &joint.statusA.enabled)) {}
     else if ( decodeJointSettingsPacketStructure(canMessage, &joint.jointSettings) |
         decodeTelemetrySettingsPacketStructure(canMessage, &joint.telemetrySettings) |
-        decodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings)) {
+        decodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings)) 
+    {
         save_settings();
-        }
+    }
     else
     {
         joint.statusA.error = 1;
     }
 }
 
+void send_settings(void)
+{
+    CAN_Message_t canMessage;
+    encodeJointSettingsPacketStructure(&canMessage, &joint.jointSettings);
+    CAN_SendMessage(&canMessage);
+
+    encodeTelemetrySettingsPacketStructure(&canMessage, &joint.telemetrySettings);
+    CAN_SendMessage(&canMessage);
+
+    encodeCommandSettingsPacketStructure(&canMessage, &joint.commandSettings);
+    CAN_SendMessage(&canMessage);
+}
 
 void send_requestedPacket(CAN_Message_t *canMessage)
 {
-    // May need to optermise this for space
+    // May need to optimise this for space
     // Can make use of the fact all settings is just a block of data
     switch (getFrecklePacketID(canMessage))
     {
@@ -93,13 +106,27 @@ void save_settings(void)
     spi_flash_select();
     HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, 100);
     HAL_SPI_Transmit(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100);
+    // joint.statusA.error = 1;
     spi_flash_deselect();
 }
 
 void load_settings(void)
 {
+    uint8_t setError = 0;
     spi_flash_select();
-    HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, 100);
-    HAL_SPI_Receive(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100);
+    HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1);
+    if (HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1) != HAL_OK)
+    {
+        setError = 1;
+    } 
+    if (HAL_SPI_Receive(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100) != HAL_OK)
+    {
+        setError = 1;
+    }
     spi_flash_deselect();
+
+    if (setError)
+    {
+        joint.statusA.error = 1;
+    }
 }

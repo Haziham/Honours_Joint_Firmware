@@ -9,11 +9,6 @@
 
 #define ENCODER_CPR 6 
 
-typedef struct {
-    uint16_t previousPosition;
-    uint16_t currentPosition;
-    int16_t deltaPosition;
-} JointInternalState_t; 
 
 
 typedef struct {
@@ -24,7 +19,6 @@ typedef struct {
     StatusC_t statusC;
     JointCommand_t command;
     CommandSettings_t commandSettings;
-    JointInternalState_t internalState;
 } Joint_t;
 
 extern Joint_t joint;
@@ -39,3 +33,5 @@ void set_motorPWM(int32_t pwm, uint8_t offset);
 
 void save_settings(void);
 void load_settings(void);
+
+void send_settings(void);
