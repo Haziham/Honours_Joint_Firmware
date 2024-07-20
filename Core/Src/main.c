@@ -51,8 +51,6 @@
 
 /* USER CODE END PV */
 
-int main(void);
-
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
@@ -130,26 +128,60 @@ int main(void)
   joint.statusC.debugValue = data;
   data = 7;
 
+  uint8_t sendData[] = {OP_WRITE_ARRAY, 0x00, 0x00, 0x00, 0x07};
+  uint8_t readData[] = {OP_READ_ARRAY, 0x00, 0x00, 0x00, 0x00};
 
+  uint8_t dataRead[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
   // load_settings();  
-    spi_flash_select();
-    HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, -1);
-    HAL_SPI_Transmit(&hspi1, &data, 1, -1);
-    spi_flash_deselect();
 
-    spi_flash_select();
+  // uint8_t deviceID[4] = {0x00, 0x00, 0x00, 0x00};
+  uint8_t status[2] = {0x00, 0x00};
+  // uint8_t temp = OP_READ_STATUS_REGISTER;
+
+    flash_writeEnable();
+
+    flash_select();
+    HAL_SPI_Transmit(&hspi1, &readStatusCommand, 1, -1);
+    HAL_SPI_Receive(&hspi1, status, 2, -1);
+    flash_deselect();
+
+    flash_select();
+    // HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, -1);
+    // HAL_SPI_Transmit(&hspi1, &data, 1, -1);
+    HAL_SPI_Transmit(&hspi1, sendData, 5, -1);
+    flash_deselect();
 
 
-    HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1);
-    HAL_SPI_Receive(&hspi1, &data, 1, -1);
-
-    spi_flash_deselect();
+    flash_select();
 
     data = 9;
-  joint.statusC.debugValue = data;
-  // send_settings();
+ 
+    // HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1);
+    // HAL_SPI_Receive(&hspi1, &data, 1, -1);
 
+    HAL_SPI_TransmitReceive(&hspi1, readData, dataRead, 6, -1);
+    flash_deselect();
+
+    joint.statusC.debugValue = data; 
+  // uint8_t temp[5] = {0x01, 0x00, 0x00, 0x00, 0x00};
+
+  // flash_writeEnable();
+  // joint.jointSettings.gearRatio = 379;
+  // joint.jointSettings.legNumber = 5;
+  // save_settings();
+  // // load_settings();  
+  // flash_select();
+  // HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1);
+  // HAL_SPI_Receive(&hspi1, temp, 5, -1);
+  // flash_deselect();
+
+  // // joint.jointSettings.gearRatio = 379;
+  // // joint.statusC.debugValue = sizeof(joint);
+  // joint.statusC.debugValue = temp[0]; 
+  
+  // joint.telemetrySettings.transmitPeriod = 1000;
+  // send_settings();
   // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | 
                                           CAN_IT_ERROR | 

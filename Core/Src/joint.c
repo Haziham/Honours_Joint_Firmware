@@ -103,29 +103,32 @@ void set_motorPWM(int32_t pwm, uint8_t offset)
 
 void save_settings(void)
 {
-    spi_flash_select();
-    HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, 100);
-    HAL_SPI_Transmit(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100);
-    spi_flash_deselect();
+    flash_select();
+    HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, -1);
+    HAL_SPI_Transmit(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), -1);
+    flash_deselect();
 }
 
 void load_settings(void)
 {
-    uint8_t setError = 0;
-    spi_flash_select();
+    // uint8_t setError = 0;
+    flash_select();
     HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1);
-    if (HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1) != HAL_OK)
-    {
-        setError = 1;
-    } 
-    if (HAL_SPI_Receive(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100) != HAL_OK)
-    {
-        setError = 1;
-    }
-    spi_flash_deselect();
+    HAL_SPI_Receive(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), -1);
+    flash_deselect();
+    // flash_select();
+    // if (HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1) != HAL_OK)
+    // {
+    //     setError = 1;
+    // } 
+    // if (HAL_SPI_Receive(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100) != HAL_OK)
+    // {
+    //     setError = 1;
+    // }
+    // flash_deselect();
 
-    if (setError)
-    {
-        joint.statusA.error = 1;
-    }
+    // if (setError)
+    // {
+    //     joint.statusA.error = 1;
+    // }
 }
