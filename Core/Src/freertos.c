@@ -188,7 +188,7 @@ void control_system_task(void const * argument)
         case CMD_POSITION:
           pwm = PID_calculate(&positionPID, joint.command.value, joint.statusA.position);
           // joint.statusC.debugValue = joint.command.value;
-          joint.statusC.debugValue = pwm;
+          // joint.statusC.debugValue = pwm;
           offset  = 1;
           // joint.statusC.debugValue = joint.command.value - joint.statusA.position;
           break;

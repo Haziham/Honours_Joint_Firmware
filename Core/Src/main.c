@@ -51,6 +51,8 @@
 
 /* USER CODE END PV */
 
+int main(void);
+
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
@@ -124,8 +126,29 @@ int main(void)
     ((uint8_t *) &joint)[i] = 0;
   }
 
-  load_settings();  
-  send_settings();
+  uint8_t data = 4;
+  joint.statusC.debugValue = data;
+  data = 7;
+
+
+
+  // load_settings();  
+    spi_flash_select();
+    HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, -1);
+    HAL_SPI_Transmit(&hspi1, &data, 1, -1);
+    spi_flash_deselect();
+
+    spi_flash_select();
+
+
+    HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1);
+    HAL_SPI_Receive(&hspi1, &data, 1, -1);
+
+    spi_flash_deselect();
+
+    data = 9;
+  joint.statusC.debugValue = data;
+  // send_settings();
 
   // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | 

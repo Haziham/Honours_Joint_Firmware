@@ -106,7 +106,6 @@ void save_settings(void)
     spi_flash_select();
     HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, 100);
     HAL_SPI_Transmit(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100);
-    // joint.statusA.error = 1;
     spi_flash_deselect();
 }
 
