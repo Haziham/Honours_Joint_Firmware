@@ -114,75 +114,9 @@ int main(void)
   PID_init(&positionPID, 100, 0, 0, 0.001, -65535, 65535); 
 
 
-  joint.jointSettings.gearRatio = 379;
-  joint.telemetrySettings.transmitPeriod = 1000;
+  load_settings();  
+  send_settings();
 
-  int i = 0;
-
-  for (i = 0; i < sizeof(joint); i++)
-  {
-    ((uint8_t *) &joint)[i] = 0;
-  }
-
-  uint8_t data = 4;
-  joint.statusC.debugValue = data;
-  data = 7;
-
-  uint8_t sendData[] = {OP_WRITE_ARRAY, 0x00, 0x00, 0x00, 0x07};
-  uint8_t readData[] = {OP_READ_ARRAY, 0x00, 0x00, 0x00, 0x00};
-
-  uint8_t dataRead[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-  // load_settings();  
-
-  // uint8_t deviceID[4] = {0x00, 0x00, 0x00, 0x00};
-  uint8_t status[2] = {0x00, 0x00};
-  // uint8_t temp = OP_READ_STATUS_REGISTER;
-
-    flash_writeEnable();
-
-    flash_select();
-    HAL_SPI_Transmit(&hspi1, &readStatusCommand, 1, -1);
-    HAL_SPI_Receive(&hspi1, status, 2, -1);
-    flash_deselect();
-
-    flash_select();
-    // HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, -1);
-    // HAL_SPI_Transmit(&hspi1, &data, 1, -1);
-    HAL_SPI_Transmit(&hspi1, sendData, 5, -1);
-    flash_deselect();
-
-
-    flash_select();
-
-    data = 9;
- 
-    // HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1);
-    // HAL_SPI_Receive(&hspi1, &data, 1, -1);
-
-    HAL_SPI_TransmitReceive(&hspi1, readData, dataRead, 6, -1);
-    flash_deselect();
-
-    joint.statusC.debugValue = data; 
-  // uint8_t temp[5] = {0x01, 0x00, 0x00, 0x00, 0x00};
-
-  // flash_writeEnable();
-  // joint.jointSettings.gearRatio = 379;
-  // joint.jointSettings.legNumber = 5;
-  // save_settings();
-  // // load_settings();  
-  // flash_select();
-  // HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1);
-  // HAL_SPI_Receive(&hspi1, temp, 5, -1);
-  // flash_deselect();
-
-  // // joint.jointSettings.gearRatio = 379;
-  // // joint.statusC.debugValue = sizeof(joint);
-  // joint.statusC.debugValue = temp[0]; 
-  
-  // joint.telemetrySettings.transmitPeriod = 1000;
-  // send_settings();
-  // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 10000);
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | 
                                           CAN_IT_ERROR | 
                                           CAN_IT_RX_FIFO0_OVERRUN |
@@ -192,11 +126,6 @@ int main(void)
 	  Error_Handler();
   }
 
-
-
-  // HAL_SPI_Receive()
-  // HAL_SPI_Transmit()
-  // HAL_SPI_TransmitReceive()
 
   /* USER CODE END 2 */
 

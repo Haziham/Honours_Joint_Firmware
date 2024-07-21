@@ -9,7 +9,9 @@
 
 #define ENCODER_CPR 6 
 
-
+typedef struct {
+    uint8_t saveSettingsFlag;
+} InternalSettings_t;
 
 typedef struct {
     JointSettings_t jointSettings;
@@ -19,6 +21,7 @@ typedef struct {
     StatusC_t statusC;
     JointCommand_t command;
     CommandSettings_t commandSettings;
+    InternalSettings_t internalSettings;  
 } Joint_t;
 
 extern Joint_t joint;
@@ -31,7 +34,8 @@ void convert_countToAngle(int16_t *angle, int16_t count);
 void set_motorPWM(int32_t pwm, uint8_t offset);
 
 
-void save_settings(void);
-void load_settings(void);
+#define save_settings() flash_writeBytes((uint8_t*)&joint.jointSettings, sizeof(JointSettings_t))
+#define load_settings() flash_readBytes((uint8_t*)&joint.jointSettings, sizeof(JointSettings_t))
+
 
 void send_settings(void);

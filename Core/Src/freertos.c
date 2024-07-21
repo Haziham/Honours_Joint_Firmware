@@ -232,11 +232,10 @@ void transmit_can_frame_task(void const * argument)
   /* USER CODE BEGIN transmit_can_frame_task */
   CAN_Message_t canMessage;
 
-  uint16_t counter = 0;
-  uint8_t temp = 0 ;
-
-  static uint32_t lastTelemetryTime = 0;
+  static uint32_t previousTelemetryTime = 0;
+  static uint32_t previousSettingsTime = 0;
   uint32_t currentTime;
+  uint32_t deltaTime;
   /* Infinite loop */
   for(;;)
   {
@@ -245,9 +244,9 @@ void transmit_can_frame_task(void const * argument)
 
       // Check if we should send some telemetry. This should be another task, but lacking space.
       currentTime = HAL_GetTick();
-      if ((currentTime - lastTelemetryTime) > joint.telemetrySettings.transmitPeriod)
+      deltaTime = currentTime - previousTelemetryTime;
+      if (deltaTime > joint.telemetrySettings.transmitPeriod)
       {
-        lastTelemetryTime = currentTime;
         encodeStatusAPacketStructure(&canMessage, &joint.statusA);
         finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
         CAN_enqueue_message(&canTxQueue, &canMessage);
@@ -259,16 +258,26 @@ void transmit_can_frame_task(void const * argument)
         encodeStatusCPacketStructure(&canMessage, &joint.statusC);
         finishFrecklePacket(&canMessage, getStatusCMaxDataLength(), getStatusCPacketID());
         CAN_enqueue_message(&canTxQueue, &canMessage);
+        previousTelemetryTime = currentTime;
       }
 
-      temp = CAN_dequeue_message(&canTxQueue, &canMessage);
-      if(temp == 0)
+
+      if(CAN_dequeue_message(&canTxQueue, &canMessage) == SUCCESS_L)
       {
         CAN_SendMessage(&canMessage);
       }
     }
     osMutexRelease(CANTxDataHandle); // Give the mutex
-    counter += 1000;
+
+    // Every 10 seconds save settings is not enabled and settings changed. 
+    deltaTime = currentTime - previousSettingsTime;
+    if (deltaTime > 10000 && !joint.statusA.enabled && joint.internalSettings.saveSettingsFlag)
+    {
+      save_settings();
+      previousSettingsTime = currentTime;
+      joint.internalSettings.saveSettingsFlag = 0;
+    }
+
     osDelay(3);
   }
   /* USER CODE END transmit_can_frame_task */

@@ -11,13 +11,17 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
         // Its a packet request 
         send_requestedPacket(canMessage); 
     }
-    else if (decodeJointCommandPacketStructure(canMessage, &joint.command) |
-        decodeEnablePacket(canMessage, &joint.statusA.enabled)) {}
-    else if ( decodeJointSettingsPacketStructure(canMessage, &joint.jointSettings) |
-        decodeTelemetrySettingsPacketStructure(canMessage, &joint.telemetrySettings) |
-        decodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings)) 
+    else if (   decodeJointCommandPacketStructure(canMessage, &joint.command) |
+                decodeEnablePacket(canMessage, &joint.statusA.enabled)) 
     {
-        save_settings();
+
+    }
+    else if (   decodeJointSettingsPacketStructure(canMessage, &joint.jointSettings) |
+                decodeTelemetrySettingsPacketStructure(canMessage, &joint.telemetrySettings) |
+                decodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings)) 
+    {
+        // Signal that settings should be saved
+        joint.internalSettings.saveSettingsFlag = 1;
     }
     else
     {
@@ -101,34 +105,3 @@ void set_motorPWM(int32_t pwm, uint8_t offset)
 
 }
 
-void save_settings(void)
-{
-    flash_select();
-    HAL_SPI_Transmit(&hspi1, transmitCommand, TRANSMIT_COMMAND_SIZE, -1);
-    HAL_SPI_Transmit(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), -1);
-    flash_deselect();
-}
-
-void load_settings(void)
-{
-    // uint8_t setError = 0;
-    flash_select();
-    HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1);
-    HAL_SPI_Receive(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), -1);
-    flash_deselect();
-    // flash_select();
-    // if (HAL_SPI_Transmit(&hspi1, readCommand, READ_COMMAND_SIZE, -1) != HAL_OK)
-    // {
-    //     setError = 1;
-    // } 
-    // if (HAL_SPI_Receive(&hspi1, (uint8_t *) &joint, sizeof(Joint_t), 100) != HAL_OK)
-    // {
-    //     setError = 1;
-    // }
-    // flash_deselect();
-
-    // if (setError)
-    // {
-    //     joint.statusA.error = 1;
-    // }
-}
