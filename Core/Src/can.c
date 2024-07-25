@@ -69,9 +69,9 @@ void MX_CAN_Init(void)
   sFilterConfig.FilterActivation = CAN_FILTER_ENABLE;
   sFilterConfig.FilterBank = 1;
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdHigh = joint.jointSettings.nodeId << 5;
   sFilterConfig.FilterIdLow = 0x0000;
-  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = joint.jointSettings.nodeId << 5;
   sFilterConfig.FilterMaskIdLow = 0x0000;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
@@ -175,7 +175,8 @@ void CAN_SendMessage(CAN_Message_t *canMessage)
   canHeader.IDE = CAN_ID_STD;
   canHeader.RTR = CAN_RTR_DATA;
 
-  canHeader.StdId = canMessage->id;
+  canHeader.StdId = canMessage->id << 5;
+  canHeader.StdId |= 0x1F & joint.jointSettings.nodeId;
   canHeader.DLC = canMessage->len;
   error = HAL_CAN_AddTxMessage(&hcan, &canHeader, canMessage->data, &txMailbox);
   if (error != HAL_OK)

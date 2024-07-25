@@ -90,6 +90,7 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 
+  joint.jointSettings.nodeId = 5;
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -115,6 +116,9 @@ int main(void)
 
 
   load_settings();  
+
+  joint.jointSettings.nodeId = 5;
+  joint.telemetrySettings.transmitPeriod = 3000;
   send_settings();
 
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | 

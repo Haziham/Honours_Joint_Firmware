@@ -33,13 +33,13 @@ void send_settings(void)
 {
     CAN_Message_t canMessage;
     encodeJointSettingsPacketStructure(&canMessage, &joint.jointSettings);
-    CAN_SendMessage(&canMessage);
+    CAN_enqueue_message(&canTxQueue, &canMessage);
 
     encodeTelemetrySettingsPacketStructure(&canMessage, &joint.telemetrySettings);
-    CAN_SendMessage(&canMessage);
+    CAN_enqueue_message(&canTxQueue, &canMessage);
 
     encodeCommandSettingsPacketStructure(&canMessage, &joint.commandSettings);
-    CAN_SendMessage(&canMessage);
+    CAN_enqueue_message(&canTxQueue, &canMessage);
 }
 
 void send_requestedPacket(CAN_Message_t *canMessage)
