@@ -6,6 +6,8 @@ Joint_t joint;
 
 void joint_decodeCANPackets(CAN_Message_t *canMessage)
 {
+    // remove node ID from ID
+    canMessage->id = canMessage->id >> 5;
     if (canMessage->len == 0)
     {
         // Its a packet request 

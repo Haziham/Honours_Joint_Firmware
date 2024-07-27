@@ -251,13 +251,13 @@ void transmit_can_frame_task(void const * argument)
         finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
         CAN_enqueue_message(&canTxQueue, &canMessage);
 
-        // encodeStatusBPacketStructure(&canMessage, &joint.statusB);
-        // finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
-        // CAN_enqueue_message(&canTxQueue, &canMessage);
+        encodeStatusBPacketStructure(&canMessage, &joint.statusB);
+        finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
+        CAN_enqueue_message(&canTxQueue, &canMessage);
 
-        // encodeStatusCPacketStructure(&canMessage, &joint.statusC);
-        // finishFrecklePacket(&canMessage, getStatusCMaxDataLength(), getStatusCPacketID());
-        // CAN_enqueue_message(&canTxQueue, &canMessage);
+        encodeStatusCPacketStructure(&canMessage, &joint.statusC);
+        finishFrecklePacket(&canMessage, getStatusCMaxDataLength(), getStatusCPacketID());
+        CAN_enqueue_message(&canTxQueue, &canMessage);
         previousTelemetryTime = currentTime;
       }
 
