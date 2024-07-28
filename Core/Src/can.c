@@ -71,7 +71,7 @@ void MX_CAN_Init(void)
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterIdHigh = joint.jointSettings.nodeId << 5;
   sFilterConfig.FilterIdLow = 0x0000;
-  sFilterConfig.FilterMaskIdHigh = joint.jointSettings.nodeId << 5;
+  sFilterConfig.FilterMaskIdHigh = 0x1F << 5;
   sFilterConfig.FilterMaskIdLow = 0x0000;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;

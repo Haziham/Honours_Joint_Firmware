@@ -89,15 +89,19 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  MX_GPIO_Init();
+  MX_SPI1_Init();
+  load_settings();  
+  // joint.jointSettings.nodeId = 3;
+  // joint.telemetrySettings.transmitPeriod = 3000;
 
-  joint.jointSettings.nodeId = 4;
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
+  // MX_GPIO_Init();
   MX_DMA_Init();
   MX_CAN_Init();
-  MX_SPI1_Init();
+  // MX_SPI1_Init();
   MX_ADC_Init();
   MX_TIM2_Init();
   MX_TIM14_Init();
@@ -114,11 +118,6 @@ int main(void)
   // PID_init(&positionPID, 650, 500, 120, 0.001, -65535, 65535); 
   PID_init(&positionPID, 100, 0, 0, 0.001, -65535, 65535); 
 
-
-  load_settings();  
-
-  joint.jointSettings.nodeId = 4;
-  joint.telemetrySettings.transmitPeriod = 3000;
   send_settings();
 
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | 

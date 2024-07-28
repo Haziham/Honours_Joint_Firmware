@@ -271,7 +271,7 @@ void transmit_can_frame_task(void const * argument)
 
     // Every 10 seconds save settings is not enabled and settings changed. 
     deltaTime = currentTime - previousSettingsTime;
-    if (deltaTime > 10000 && !joint.statusA.enabled && joint.internalSettings.saveSettingsFlag)
+    if (deltaTime > 1000 && !joint.statusA.enabled && joint.internalSettings.saveSettingsFlag)
     {
       save_settings();
       previousSettingsTime = currentTime;
