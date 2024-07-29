@@ -71,7 +71,7 @@ PID_t positionPID;
   */
 int main(void)
 {
-
+  // return;
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -92,8 +92,11 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI1_Init();
   load_settings();  
-  // joint.jointSettings.nodeId = 3;
-  // joint.telemetrySettings.transmitPeriod = 3000;
+  // joint.settings.joint.nodeId = 1;
+  // joint.settings.joint.nodeId = 2;
+  // joint.settings.joint.nodeId = 3;
+  // joint.settings.telemetry.transmitPeriod = 3000;
+  joint.internalFlags.saveSettingsFlag = 0;
 
   /* USER CODE END SysInit */
 

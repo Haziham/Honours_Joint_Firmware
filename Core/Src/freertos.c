@@ -179,7 +179,7 @@ void control_system_task(void const * argument)
     uint8_t offset = 0;
     if (joint.statusA.enabled)
     {
-      switch (joint.commandSettings.mode)
+      switch (joint.settings.command.mode)
       {
         case CMD_PWM:
           pwm = joint.command.value;
@@ -239,13 +239,13 @@ void transmit_can_frame_task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+    currentTime = HAL_GetTick();
     if (osMutexWait(CANTxDataHandle, osWaitForever) == osOK)
     {
 
       // Check if we should send some telemetry. This should be another task, but lacking space.
-      currentTime = HAL_GetTick();
       deltaTime = currentTime - previousTelemetryTime;
-      if (deltaTime > joint.telemetrySettings.transmitPeriod)
+      if (deltaTime > joint.settings.telemetry.transmitPeriod)
       {
         encodeStatusAPacketStructure(&canMessage, &joint.statusA);
         finishFrecklePacket(&canMessage, getStatusAMaxDataLength(), getStatusAPacketID());
@@ -271,11 +271,14 @@ void transmit_can_frame_task(void const * argument)
 
     // Every 10 seconds save settings is not enabled and settings changed. 
     deltaTime = currentTime - previousSettingsTime;
-    if (deltaTime > 1000 && !joint.statusA.enabled && joint.internalSettings.saveSettingsFlag)
+    if (deltaTime > 1000 && !joint.statusA.enabled && joint.internalFlags.saveSettingsFlag)
     {
+      // Disable interrupts
+      __disable_irq();
       save_settings();
+      __enable_irq();
       previousSettingsTime = currentTime;
-      joint.internalSettings.saveSettingsFlag = 0;
+      joint.internalFlags.saveSettingsFlag = 0;
     }
 
     osDelay(3);

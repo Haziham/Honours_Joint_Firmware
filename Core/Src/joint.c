@@ -18,12 +18,12 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
     {
 
     }
-    else if (   decodeJointSettingsPacketStructure(canMessage, &joint.jointSettings) |
-                decodeTelemetrySettingsPacketStructure(canMessage, &joint.telemetrySettings) |
-                decodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings)) 
+    else if (   decodeJointSettingsPacketStructure(canMessage, &joint.settings.joint) |
+                decodeTelemetrySettingsPacketStructure(canMessage, &joint.settings.telemetry) |
+                decodeCommandSettingsPacketStructure(canMessage, &joint.settings.command)) 
     {
         // Signal that settings should be saved
-        joint.internalSettings.saveSettingsFlag = 1;
+        joint.internalFlags.saveSettingsFlag = 1;
     }
     else
     {
@@ -34,13 +34,13 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
 void send_settings(void)
 {
     CAN_Message_t canMessage;
-    encodeJointSettingsPacketStructure(&canMessage, &joint.jointSettings);
+    encodeJointSettingsPacketStructure(&canMessage, &joint.settings.joint);
     CAN_enqueue_message(&canTxQueue, &canMessage);
 
-    encodeTelemetrySettingsPacketStructure(&canMessage, &joint.telemetrySettings);
+    encodeTelemetrySettingsPacketStructure(&canMessage, &joint.settings.telemetry);
     CAN_enqueue_message(&canTxQueue, &canMessage);
 
-    encodeCommandSettingsPacketStructure(&canMessage, &joint.commandSettings);
+    encodeCommandSettingsPacketStructure(&canMessage, &joint.settings.command);
     CAN_enqueue_message(&canTxQueue, &canMessage);
 }
 
@@ -54,7 +54,7 @@ void send_requestedPacket(CAN_Message_t *canMessage)
         encodeJointCommandPacketStructure(canMessage, &joint.command);
         break;
     case PKT_JOINT_SETTINGS:
-        encodeJointSettingsPacketStructure(canMessage, &joint.jointSettings);
+        encodeJointSettingsPacketStructure(canMessage, &joint.settings.joint);
         break;
     case PKT_STATUSA:
         encodeStatusAPacketStructure(canMessage, &joint.statusA);
@@ -63,10 +63,10 @@ void send_requestedPacket(CAN_Message_t *canMessage)
         encodeStatusBPacketStructure(canMessage, &joint.statusB);
         break;
     case PKT_TELEMETRY_SETTINGS:
-        encodeTelemetrySettingsPacketStructure(canMessage, &joint.telemetrySettings);
+        encodeTelemetrySettingsPacketStructure(canMessage, &joint.settings.telemetry);
         break;
     case PKT_COMMAND_SETTINGS:
-        encodeCommandSettingsPacketStructure(canMessage, &joint.commandSettings);
+        encodeCommandSettingsPacketStructure(canMessage, &joint.settings.command);
         break;
     default:
         break;
@@ -80,7 +80,7 @@ void send_requestedPacket(CAN_Message_t *canMessage)
 // Angle is in 0.1 degrees
 void convert_countToAngle(int16_t *angle, int16_t count)
 {
-    *angle = (count * 360 * 10) / (ENCODER_CPR * joint.jointSettings.gearRatio);
+    *angle = (count * 360 * 10) / (ENCODER_CPR * joint.settings.joint.gearRatio);
 }
 
 
