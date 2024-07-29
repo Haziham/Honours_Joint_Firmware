@@ -151,18 +151,20 @@ void control_system_task(void const * argument)
   uint32_t currentTimeMs = 0;
   uint32_t previousTimeMs = 0;
   int32_t deltaTimeMs = 0;
+  uint8_t updateVelocity = 0;
+  int32_t pwm = 0;
+  uint8_t offset = 0;
 
 
   /* Infinite loop */
   for(;;)
   {
     currentPosition = __HAL_TIM_GET_COUNTER(&htim2);
-
-
     convert_countToAngle(&joint.statusA.position, currentPosition);
 
     currentTimeMs = HAL_GetTick();
     deltaTimeMs = currentTimeMs - previousTimeMs;
+    updateVelocity = 0;
     if (deltaTimeMs > 100)
     {
       deltaPosition = currentPosition - previousPosition;
@@ -172,18 +174,10 @@ void control_system_task(void const * argument)
       
       previousPosition = currentPosition;
       previousTimeMs = currentTimeMs;
+      updateVelocity = 1;
     }
 
 
-
-    // encodeJointSettingsPacketStructure(&canMessage, &jointSettings);
-    // finishFrecklePacket(&canMessage, getJointSettingsMaxDataLength(), getJointSettingsPacketID());
-    // xSemaphoreTake(CANTxDataHandle, portMAX_DELAY); // Take the mutex
-    // CAN_enqueue_message(&canTxQueue, &canMessage);
-    // xSemaphoreGive(CANTxDataHandle); // Give the mutex
-    // osDelay(1000);
-    uint32_t pwm = 0;
-    uint8_t offset = 0;
     if (joint.statusA.enabled)
     {
       switch (joint.settings.command.mode)
@@ -194,10 +188,16 @@ void control_system_task(void const * argument)
           break;
         case CMD_POSITION:
           pwm = PID_calculate(&positionPID, joint.command.value, joint.statusA.position);
-          // joint.statusC.debugValue = joint.command.value;
-          // joint.statusC.debugValue = pwm;
           offset  = 1;
-          // joint.statusC.debugValue = joint.command.value - joint.statusA.position;
+          break;
+        case CMD_CALIBRATE:
+          if (updateVelocity)
+          {
+            joint.statusA.calibrating = 1;
+            joint_calibrate(&pwm, joint.statusA.position, joint.statusA.velocity);
+            joint.statusC.debugValue = pwm;
+            offset = 1;
+          }
           break;
         case CMD_VELOCITY:
         case CMD_TORQUE:
@@ -210,6 +210,8 @@ void control_system_task(void const * argument)
       pwm = 0;
       offset = 0;
       joint.command.value = 0;
+      joint.statusA.calibrating = 0;
+      joint.internalFlags.calibrateStep = CALIBRATE_START;
     }
 
 
@@ -217,7 +219,6 @@ void control_system_task(void const * argument)
     joint.statusB.current = getCurrent();
     joint.statusB.voltage = getVoltage();
     joint.statusB.externalADC = getExternalVoltage();
-    // joint.statusC.debugValue = deltaTimeMs;
 
 
     osDelay(1);

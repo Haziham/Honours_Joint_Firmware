@@ -4,6 +4,15 @@
 
 Joint_t joint;
 
+void joint_init(void)
+{
+    joint.internalFlags.saveSettingsFlag = 0;
+    joint.internalFlags.calibrateStep = CALIBRATE_START;
+    joint.statusA.enabled = 0;
+    joint.statusA.calibrated = 0;   
+    joint.statusA.calibrating = 0;
+}
+
 void joint_decodeCANPackets(CAN_Message_t *canMessage)
 {
     // remove node ID from ID
@@ -14,7 +23,7 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
         send_requestedPacket(canMessage); 
     }
     else if (   decodeJointCommandPacketStructure(canMessage, &joint.command) |
-                decodeEnablePacket(canMessage, &joint.statusA.enabled)) 
+                decodeEnablePacket(canMessage, &joint.statusA.enabled))
     {
 
     }
@@ -43,6 +52,50 @@ void send_settings(void)
     encodeCommandSettingsPacketStructure(&canMessage, &joint.settings.command);
     CAN_enqueue_message(&canTxQueue, &canMessage);
 }
+
+
+
+
+/*
+pwm, is the pwm value to be set
+velocity, is the current velocity of the joint.
+position, is the current position of the joint
+
+*/
+void joint_calibrate(int32_t *pwm, int16_t position, int16_t velocity)
+{
+    switch (joint.internalFlags.calibrateStep)
+    {
+    case CALIBRATE_START:
+        *pwm = -CALIBRATION_PWM;
+        joint.internalFlags.calibrateStep = FIND_MIN;
+        break;
+    case FIND_MIN:
+        if (velocity == 0)
+        {
+            joint.statusC.debugValue = velocity;
+            joint.settings.joint.minAngle = position + STOP_POINT_OFFSET;
+            *pwm = CALIBRATION_PWM;
+            joint.internalFlags.calibrateStep = FIND_MAX;
+        }
+        break;
+    case FIND_MAX:
+        if (velocity == 0)
+        {
+            joint.settings.joint.maxAngle = position - STOP_POINT_OFFSET;
+            joint.internalFlags.calibrateStep = CALIBRATE_END;
+        }
+        break;
+    case CALIBRATE_END:
+    default:
+        joint.statusA.calibrating = 0; 
+        joint.statusA.calibrated = 1;
+        joint.internalFlags.calibrateStep = CALIBRATE_START;
+        joint.settings.command.mode = CMD_POSITION;
+        joint.statusA.enabled = 0;
+    }
+}
+
 
 void send_requestedPacket(CAN_Message_t *canMessage)
 {

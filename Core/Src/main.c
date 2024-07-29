@@ -96,7 +96,7 @@ int main(void)
   // joint.settings.joint.nodeId = 2;
   // joint.settings.joint.nodeId = 3;
   // joint.settings.telemetry.transmitPeriod = 3000;
-  joint.internalFlags.saveSettingsFlag = 0;
+  joint_init();
 
   /* USER CODE END SysInit */
 

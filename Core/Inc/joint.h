@@ -8,9 +8,19 @@
 #include "AT25DF011.h"
 
 #define ENCODER_CPR 12
+#define STOP_POINT_OFFSET 50 // The 0.1s of degrees offset form stop points
+
+
+#define CALIBRATE_START 0
+#define FIND_MIN 1
+#define FIND_MAX 2
+#define CALIBRATE_END 3
+
+#define CALIBRATION_PWM 10000
 
 typedef struct {
     uint8_t saveSettingsFlag;
+    uint8_t calibrateStep;
 } InternalFlags_t;
 
 typedef struct {
@@ -31,6 +41,7 @@ typedef struct {
 
 extern Joint_t joint;
 
+void joint_init(void);
 
 void joint_decodeCANPackets(CAN_Message_t* canMessage); 
 void send_requestedPacket(CAN_Message_t *canMessage);
@@ -43,3 +54,6 @@ void set_motorPWM(int32_t pwm, uint8_t offset);
 
 
 void send_settings(void);
+
+
+void joint_calibrate(int32_t* pwm, int16_t position, int16_t velocity);
