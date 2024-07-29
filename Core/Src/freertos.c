@@ -157,13 +157,20 @@ void control_system_task(void const * argument)
   for(;;)
   {
     currentPosition = __HAL_TIM_GET_COUNTER(&htim2);
-    deltaPosition = currentPosition - previousPosition;
 
-    currentTimeMs = HAL_GetTick();
-    deltaTimeMs = currentTimeMs - previousTimeMs;
 
     convert_countToAngle(&joint.statusA.position, currentPosition);
-    convert_countToAngle(&joint.statusA.velocity, (deltaPosition*1000)/deltaTimeMs); 
+
+    if (deltaTimeMs > 100)
+    {
+      currentTimeMs = HAL_GetTick();
+      deltaTimeMs = currentTimeMs - previousTimeMs;
+      deltaPosition = currentPosition - previousPosition;
+
+      convert_countToAngle(&joint.statusA.velocity, (deltaPosition*1000)/deltaTimeMs); 
+      previousPosition = currentPosition;
+      previousTimeMs = currentTimeMs;
+    }
     // joint.statusA.velocity = deltaPosition;
 
     joint.statusA.moving = deltaPosition != 0;
@@ -214,8 +221,6 @@ void control_system_task(void const * argument)
     // joint.statusC.debugValue = deltaTimeMs;
 
 
-    previousPosition = currentPosition;
-    previousTimeMs = currentTimeMs;
     osDelay(10);
   }
   /* USER CODE END control_system_task */

@@ -7,7 +7,7 @@
 #include "spi.h"
 #include "AT25DF011.h"
 
-#define ENCODER_CPR 6 
+#define ENCODER_CPR 12
 
 typedef struct {
     uint8_t saveSettingsFlag;
