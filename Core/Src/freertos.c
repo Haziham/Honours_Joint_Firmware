@@ -164,6 +164,7 @@ void control_system_task(void const * argument)
 
     convert_countToAngle(&joint.statusA.position, currentPosition);
     convert_countToAngle(&joint.statusA.velocity, (deltaPosition*1000)/deltaTimeMs); 
+    // joint.statusA.velocity = deltaPosition;
 
     joint.statusA.moving = deltaPosition != 0;
     joint.statusA.direction = joint.statusA.velocity > 0;
@@ -215,7 +216,7 @@ void control_system_task(void const * argument)
 
     previousPosition = currentPosition;
     previousTimeMs = currentTimeMs;
-    osDelay(1);
+    osDelay(10);
   }
   /* USER CODE END control_system_task */
 }
