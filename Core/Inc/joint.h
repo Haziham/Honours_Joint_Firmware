@@ -24,9 +24,16 @@ typedef struct {
 } InternalFlags_t;
 
 typedef struct {
+    uint32_t position;
+} InternalSettings_t;
+
+typedef struct {
     JointSettings_t joint;
     TelemetrySettings_t telemetry;
     CommandSettings_t command;
+    CalibrationSettings_t calibration;
+    ControlSettings_t control;
+    InternalSettings_t internal;
 } Settings_t;
 
 
@@ -56,4 +63,4 @@ void set_motorPWM(int32_t pwm, uint8_t offset);
 void send_settings(void);
 
 
-void joint_calibrate(int32_t* pwm, int16_t position, int16_t velocity);
+void joint_calibrate(int32_t* pwm, uint32_t position, int16_t velocity);

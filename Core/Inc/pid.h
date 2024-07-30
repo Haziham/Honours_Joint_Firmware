@@ -3,9 +3,9 @@
 #include <stdint.h>
 
 typedef struct {
-    float Kp;
-    float Ki;
-    float Kd;
+    float* Kp;
+    float* Ki;
+    float* Kd;
     float Ts;
     float previousError;
     float sumError;
@@ -13,5 +13,5 @@ typedef struct {
     float minOutput;
 } PID_t;
 
-void PID_init(PID_t *pid, float Kp, float Ki, float Kd, float Ts, float minOutput, float maxOutput);
+void PID_init(PID_t *pid, float* Kp, float* Ki, float* Kd, float Ts, float minOutput, float maxOutput);
 float PID_calculate(PID_t *pid, int setpoint, int feedback);

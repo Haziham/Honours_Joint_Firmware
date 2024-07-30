@@ -29,7 +29,9 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
     }
     else if (   decodeJointSettingsPacketStructure(canMessage, &joint.settings.joint) |
                 decodeTelemetrySettingsPacketStructure(canMessage, &joint.settings.telemetry) |
-                decodeCommandSettingsPacketStructure(canMessage, &joint.settings.command)) 
+                decodeCommandSettingsPacketStructure(canMessage, &joint.settings.command) | 
+                decodeCalibrationSettingsPacketStructure(canMessage, &joint.settings.calibration) |
+                decodeControlSettingsPacketStructure(canMessage, &joint.settings.control))
     {
         // Signal that settings should be saved
         joint.internalFlags.saveSettingsFlag = 1;
@@ -62,8 +64,11 @@ velocity, is the current velocity of the joint.
 position, is the current position of the joint
 
 */
-void joint_calibrate(int32_t *pwm, int16_t position, int16_t velocity)
+void joint_calibrate(int32_t *pwm, uint32_t position, int16_t velocity)
 {
+    static int32_t maxPosition = 0;
+    static int32_t minPosition = 0;
+    int32_t halfDelta = 0;
     switch (joint.internalFlags.calibrateStep)
     {
     case CALIBRATE_START:
@@ -73,8 +78,7 @@ void joint_calibrate(int32_t *pwm, int16_t position, int16_t velocity)
     case FIND_MIN:
         if (velocity == 0)
         {
-            joint.statusC.debugValue = velocity;
-            joint.settings.joint.minAngle = position + STOP_POINT_OFFSET;
+            minPosition = position;
             *pwm = CALIBRATION_PWM;
             joint.internalFlags.calibrateStep = FIND_MAX;
         }
@@ -82,7 +86,7 @@ void joint_calibrate(int32_t *pwm, int16_t position, int16_t velocity)
     case FIND_MAX:
         if (velocity == 0)
         {
-            joint.settings.joint.maxAngle = position - STOP_POINT_OFFSET;
+            maxPosition = position;
             joint.internalFlags.calibrateStep = CALIBRATE_END;
         }
         break;
@@ -91,8 +95,14 @@ void joint_calibrate(int32_t *pwm, int16_t position, int16_t velocity)
         joint.statusA.calibrating = 0; 
         joint.statusA.calibrated = 1;
         joint.internalFlags.calibrateStep = CALIBRATE_START;
+
+        halfDelta = (maxPosition - minPosition);
+        convert_countToAngle(&joint.settings.calibration.minAngle, -halfDelta);
+        convert_countToAngle(&joint.settings.calibration.maxAngle, halfDelta);
+
+        __HAL_TIM_SET_COUNTER(&htim2, halfDelta/2);
         joint.settings.command.mode = CMD_POSITION;
-        joint.statusA.enabled = 0;
+        joint.command.value = 0;
     }
 }
 

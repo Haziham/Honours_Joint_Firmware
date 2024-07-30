@@ -159,20 +159,20 @@ void control_system_task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    currentPosition = __HAL_TIM_GET_COUNTER(&htim2);
-    convert_countToAngle(&joint.statusA.position, currentPosition);
+    joint.settings.internal.position =  __HAL_TIM_GET_COUNTER(&htim2);
+    convert_countToAngle(&joint.statusA.position, joint.settings.internal.position);
 
     currentTimeMs = HAL_GetTick();
     deltaTimeMs = currentTimeMs - previousTimeMs;
     updateVelocity = 0;
     if (deltaTimeMs > 100)
     {
-      deltaPosition = currentPosition - previousPosition;
+      deltaPosition = joint.settings.internal.position - previousPosition;
       convert_countToAngle(&joint.statusA.velocity, (deltaPosition*1000)/deltaTimeMs); 
       joint.statusA.moving = deltaPosition != 0;
       joint.statusA.direction = joint.statusA.velocity > 0;
       
-      previousPosition = currentPosition;
+      previousPosition = joint.settings.internal.position;
       previousTimeMs = currentTimeMs;
       updateVelocity = 1;
     }
@@ -194,7 +194,7 @@ void control_system_task(void const * argument)
           if (updateVelocity)
           {
             joint.statusA.calibrating = 1;
-            joint_calibrate(&pwm, joint.statusA.position, joint.statusA.velocity);
+            joint_calibrate(&pwm, joint.settings.internal.position, joint.statusA.velocity);
             joint.statusC.debugValue = pwm;
             offset = 1;
           }

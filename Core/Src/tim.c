@@ -70,6 +70,8 @@ void MX_TIM2_Init(void)
   }
   /* USER CODE BEGIN TIM2_Init 2 */
 
+  __HAL_TIM_SET_COUNTER(&htim2, joint.settings.internal.position);
+
   /* USER CODE END TIM2_Init 2 */
 
 }

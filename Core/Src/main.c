@@ -121,7 +121,7 @@ int main(void)
 
 
   // PID_init(&positionPID, 650, 500, 120, 0.001, -65535, 65535); 
-  PID_init(&positionPID, 100, 0, 0, 0.001, -65535, 65535); 
+  PID_init(&positionPID, &joint.settings.control.pGain, &joint.settings.control.iGain, &joint.settings.control.dGain, 0.001, -65535, 65535); 
 
   send_settings();
 
