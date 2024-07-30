@@ -195,7 +195,7 @@ void control_system_task(void const * argument)
           {
             joint.statusA.calibrating = 1;
             joint_calibrate(&pwm, joint.settings.internal.position, joint.statusA.velocity);
-            joint.statusC.debugValue = pwm;
+            // joint.statusC.debugValue = pwm;
             offset = 1;
           }
           break;

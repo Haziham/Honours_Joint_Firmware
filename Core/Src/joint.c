@@ -53,6 +53,12 @@ void send_settings(void)
 
     encodeCommandSettingsPacketStructure(&canMessage, &joint.settings.command);
     CAN_enqueue_message(&canTxQueue, &canMessage);
+
+    encodeCalibrationSettingsPacketStructure(&canMessage, &joint.settings.calibration);
+    CAN_enqueue_message(&canTxQueue, &canMessage);
+
+    encodeControlSettingsPacketStructure(&canMessage, &joint.settings.control);
+    CAN_enqueue_message(&canTxQueue, &canMessage);
 }
 
 
@@ -131,8 +137,13 @@ void send_requestedPacket(CAN_Message_t *canMessage)
     case PKT_COMMAND_SETTINGS:
         encodeCommandSettingsPacketStructure(canMessage, &joint.settings.command);
         break;
-    default:
+    case PKT_CALIBRATION_SETTINGS:
+        encodeCalibrationSettingsPacketStructure(canMessage, &joint.settings.calibration);
         break;
+    case PKT_CONTROL_SETTINGS:
+        encodeControlSettingsPacketStructure(canMessage, &joint.settings.control);
+        break;
+    default:
         joint.statusA.error = 1;
         return;
     }
