@@ -67,7 +67,7 @@ void MX_CAN_Init(void)
   CAN_FilterTypeDef sFilterConfig;
 
   sFilterConfig.FilterActivation = CAN_FILTER_ENABLE;
-  sFilterConfig.FilterBank = 1;
+  sFilterConfig.FilterBank = 0;
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterIdHigh = joint.settings.joint.nodeId << 5;
   sFilterConfig.FilterIdLow = 0x0000;
@@ -79,6 +79,10 @@ void MX_CAN_Init(void)
 
   HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
 
+  sFilterConfig.FilterBank = 1;
+  sFilterConfig.FilterIdHigh = 0x1F << 5;
+
+  HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
   /* USER CODE END CAN_Init 2 */
 
 }

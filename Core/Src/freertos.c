@@ -178,6 +178,7 @@ void control_system_task(void const * argument)
     }
 
 
+    // joint.statusC.debugValue = joint.command.value;
     if (joint.statusA.enabled)
     {
       switch (joint.settings.command.mode)
@@ -187,7 +188,7 @@ void control_system_task(void const * argument)
           offset = 1;
           break;
         case CMD_POSITION:
-          pwm = PID_calculate(&positionPID, joint.command.value, joint.statusA.position);
+          pwm = PID_calculate(&positionPID, joint.command.value + joint.settings.calibration.angleOffset, joint.statusA.position);
           offset  = 1;
           break;
         case CMD_CALIBRATE:
@@ -214,11 +215,21 @@ void control_system_task(void const * argument)
       joint.internalFlags.calibrateStep = CALIBRATE_START;
     }
 
+    // joint.statusC.debugValue = joint_isPastStopPoint(joint.statusA.position);
+    // joint.statusC.debugValue = joint.statusA.position;
+    joint.statusC.debugValue = joint.settings.calibration.minAngle;
+
+    if (joint_isPastStopPoint(joint.statusA.position) &&
+        !joint.statusA.calibrating)
+    {
+      pwm = 1000;
+    }
 
     set_motorPWM(pwm, offset);
     joint.statusB.current = getCurrent();
     joint.statusB.voltage = getVoltage();
     joint.statusB.externalADC = getExternalVoltage();
+
 
 
     osDelay(1);

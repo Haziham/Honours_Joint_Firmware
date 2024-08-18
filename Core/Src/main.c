@@ -121,9 +121,9 @@ int main(void)
 
 
   // PID_init(&positionPID, 650, 500, 120, 0.001, -65535, 65535); 
-  joint.settings.control.pGain = 100;
-  joint.settings.control.iGain = 0;
-  joint.settings.control.dGain = 0;
+  // joint.settings.control.pGain = 100;
+  // joint.settings.control.iGain = 0;
+  // joint.settings.control.dGain = 0;
   PID_init(&positionPID, &joint.settings.control.pGain, &joint.settings.control.iGain, &joint.settings.control.dGain, 0.001, -65535, 65535); 
 
   send_settings();

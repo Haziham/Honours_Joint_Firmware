@@ -64,3 +64,4 @@ void send_settings(void);
 
 
 void joint_calibrate(int32_t* pwm, uint32_t position, int16_t velocity);
+uint8_t joint_isPastStopPoint(int16_t angle);

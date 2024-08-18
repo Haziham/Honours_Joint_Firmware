@@ -45,6 +45,9 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
 void send_settings(void)
 {
     CAN_Message_t canMessage;
+    encodeControlSettingsPacketStructure(&canMessage, &joint.settings.control);
+    CAN_enqueue_message(&canTxQueue, &canMessage);
+
     encodeJointSettingsPacketStructure(&canMessage, &joint.settings.joint);
     CAN_enqueue_message(&canTxQueue, &canMessage);
 
@@ -57,8 +60,6 @@ void send_settings(void)
     encodeCalibrationSettingsPacketStructure(&canMessage, &joint.settings.calibration);
     CAN_enqueue_message(&canTxQueue, &canMessage);
 
-    encodeControlSettingsPacketStructure(&canMessage, &joint.settings.control);
-    CAN_enqueue_message(&canTxQueue, &canMessage);
 }
 
 
@@ -102,16 +103,27 @@ void joint_calibrate(int32_t *pwm, uint32_t position, int16_t velocity)
         joint.statusA.calibrated = 1;
         joint.internalFlags.calibrateStep = CALIBRATE_START;
 
-        halfDelta = (maxPosition - minPosition);
-        convert_countToAngle(&joint.settings.calibration.minAngle, -halfDelta);
-        convert_countToAngle(&joint.settings.calibration.maxAngle, halfDelta);
+        halfDelta = (maxPosition - minPosition) / 2;
+        halfDelta = halfDelta < 0 ? -halfDelta : halfDelta;
 
-        __HAL_TIM_SET_COUNTER(&htim2, halfDelta/2);
+        convert_countToAngle(&joint.settings.calibration.minAngle, -halfDelta + 10);
+        convert_countToAngle(&joint.settings.calibration.maxAngle, halfDelta - 10);
+
+        __HAL_TIM_SET_COUNTER(&htim2, halfDelta);
         joint.settings.command.mode = CMD_POSITION;
         joint.command.value = 0;
+        send_settings();
     }
 }
 
+uint8_t joint_isPastStopPoint(int16_t angle)
+{
+    if (angle < joint.settings.calibration.minAngle || angle > joint.settings.calibration.maxAngle)
+    {
+        return 1;
+    }
+    return 0;
+}
 
 void send_requestedPacket(CAN_Message_t *canMessage)
 {
@@ -163,8 +175,12 @@ void set_motorPWM(int32_t pwm, uint8_t offset)
 {
     uint8_t direction = pwm > 0 ? DIR_FORWARD : DIR_BACKWARD;
     pwm = pwm < 0 ? -pwm : pwm;
-    
-    pwm += offset ? 5000 : 0;
+
+    if (pwm != 0)
+    {
+        pwm += offset ? 5000 : 0;
+    }
+
     pwm = pwm > 65535 ? 65535 : pwm;
     pwm = 65535 - pwm;
 
