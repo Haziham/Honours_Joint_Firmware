@@ -15,7 +15,7 @@ void PID_init(PID_t *pid, float* Kp, float* Ki, float* Kd, float Ts, float minOu
 float PID_calculate(PID_t *pid, int setPoint, int feedback)
 {
 	float output;
-	float error = feedback - setPoint;
+	float error =  setPoint - feedback;
 
 	output = *(pid->Kp) * error;
 	output += *(pid->Ki) * pid->sumError * pid->Ts;

@@ -182,6 +182,7 @@ float getCurrent()
 
 float getExternalVoltage()
 {
-    return 20.5f;
+    // return 20.5f;
+    return adcBuffer[EXTERNAL_ADC];
 }
 /* USER CODE END 1 */

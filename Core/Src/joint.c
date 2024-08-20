@@ -22,14 +22,14 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
         // Its a packet request 
         send_requestedPacket(canMessage); 
     }
-    else if (   decodeJointCommandPacketStructure(canMessage, &joint.command) |
-                decodeEnablePacket(canMessage, &joint.statusA.enabled))
+    else if (   decodeJointCommandPacketStructure(canMessage, &joint.command))
     {
 
     }
     else if (   decodeJointSettingsPacketStructure(canMessage, &joint.settings.joint) |
                 decodeTelemetrySettingsPacketStructure(canMessage, &joint.settings.telemetry) |
                 decodeCommandSettingsPacketStructure(canMessage, &joint.settings.command) | 
+                decodeEnablePacket(canMessage, &joint.statusA.enabled) |
                 decodeCalibrationSettingsPacketStructure(canMessage, &joint.settings.calibration) |
                 decodeControlSettingsPacketStructure(canMessage, &joint.settings.control))
     {
@@ -116,14 +116,20 @@ void joint_calibrate(int32_t *pwm, uint32_t position, int16_t velocity)
     }
 }
 
-uint8_t joint_isPastStopPoint(int16_t angle)
-{
-    if (angle < joint.settings.calibration.minAngle || angle > joint.settings.calibration.maxAngle)
-    {
-        return 1;
+
+AngleStatus checkAngle(int16_t angle) {
+    int16_t min = joint.settings.calibration.minAngle;
+    int16_t max = joint.settings.calibration.maxAngle;    
+
+    if (angle < min) {
+        return ANGLE_BELOW_MIN;
+    } else if (angle > max) {
+        return ANGLE_ABOVE_MAX;
+    } else {
+        return ANGLE_WITHIN_BOUNDS;
     }
-    return 0;
 }
+
 
 void send_requestedPacket(CAN_Message_t *canMessage)
 {
@@ -186,13 +192,13 @@ void set_motorPWM(int32_t pwm, uint8_t offset)
 
     if (direction == DIR_FORWARD)
     {
-        __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 65535);
-        __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, pwm);
+        __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, pwm);
+        __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 65535);
     }
     else
     {
-        __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, pwm);
-        __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 65535);
+        __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 65535);
+        __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, pwm);
     }
 
 }

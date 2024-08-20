@@ -9,12 +9,20 @@
 
 #define ENCODER_CPR 12
 #define STOP_POINT_OFFSET 50 // The 0.1s of degrees offset form stop points
+#define SAFE_PWM 3000
 
 
 #define CALIBRATE_START 0
 #define FIND_MIN 1
 #define FIND_MAX 2
 #define CALIBRATE_END 3
+
+typedef enum {
+    ANGLE_WITHIN_BOUNDS = 0,
+    ANGLE_BELOW_MIN = 1,
+    ANGLE_ABOVE_MAX = -1
+} AngleStatus;
+
 
 #define CALIBRATION_PWM 10000
 
@@ -64,4 +72,4 @@ void send_settings(void);
 
 
 void joint_calibrate(int32_t* pwm, uint32_t position, int16_t velocity);
-uint8_t joint_isPastStopPoint(int16_t angle);
+AngleStatus checkAngle(int16_t angle);

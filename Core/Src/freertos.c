@@ -1,4 +1,5 @@
 /* USER CODE BEGIN Header */
+
 /**
   ******************************************************************************
   * File Name          : freertos.c
@@ -145,7 +146,6 @@ void control_system_task(void const * argument)
   /* USER CODE BEGIN control_system_task */
   // __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 50000);
 
-  int16_t currentPosition = 0;
   int16_t previousPosition = 0;
   int16_t deltaPosition = 0;
   uint32_t currentTimeMs = 0;
@@ -219,11 +219,17 @@ void control_system_task(void const * argument)
     // joint.statusC.debugValue = joint.statusA.position;
     joint.statusC.debugValue = joint.settings.calibration.minAngle;
 
-    if (joint_isPastStopPoint(joint.statusA.position) &&
-        !joint.statusA.calibrating)
+
+    // Check if the joint is past the stop point, prevent it going further.
+    AngleStatus angleStatus = checkAngle(joint.statusA.position);
+    if ( !joint.statusA.calibrating &&    
+         angleStatus != ANGLE_WITHIN_BOUNDS &&
+        ((angleStatus == ANGLE_BELOW_MIN && pwm < 0) || (angleStatus == ANGLE_ABOVE_MAX && pwm > 0)))
     {
-      pwm = 1000;
+      pwm = 0;
+      offset = 0;
     }
+
 
     set_motorPWM(pwm, offset);
     joint.statusB.current = getCurrent();
