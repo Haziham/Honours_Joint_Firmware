@@ -38,7 +38,7 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
     }
     else
     {
-        joint.statusA.error = 1;
+        // joint.statusA.error = 1;
     }
 }
 
@@ -162,7 +162,7 @@ void send_requestedPacket(CAN_Message_t *canMessage)
         encodeControlSettingsPacketStructure(canMessage, &joint.settings.control);
         break;
     default:
-        joint.statusA.error = 1;
+        // joint.statusA.error = 1;
         return;
     }
 

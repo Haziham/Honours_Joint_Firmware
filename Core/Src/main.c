@@ -92,10 +92,12 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI1_Init();
   load_settings();  
+
   // joint.settings.joint.nodeId = 1;
   // joint.settings.joint.nodeId = 2;
-  // joint.settings.joint.nodeId = 3;
+  // joint.settings.joint.nodeId = 7;
   // joint.settings.telemetry.transmitPeriod = 3000;
+  // joint.settings.joint.nodeId = 4;
   joint_init();
 
   /* USER CODE END SysInit */
@@ -126,7 +128,7 @@ int main(void)
   // joint.settings.control.dGain = 0;
   PID_init(&positionPID, &joint.settings.control.pGain, &joint.settings.control.iGain, &joint.settings.control.dGain, 0.001, -65535, 65535); 
 
-  send_settings();
+  // send_settings();
 
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | 
                                           CAN_IT_ERROR | 
