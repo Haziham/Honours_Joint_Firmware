@@ -217,7 +217,7 @@ void control_system_task(void const * argument)
 
     // joint.statusC.debugValue = joint_isPastStopPoint(joint.statusA.position);
     // joint.statusC.debugValue = joint.statusA.position;
-    joint.statusC.debugValue = joint.settings.calibration.minAngle;
+    // joint.statusC.debugValue1 = joint.settings.calibration.minAngle;
 
 
     // Check if the joint is past the stop point, prevent it going further.
@@ -278,9 +278,12 @@ void transmit_can_frame_task(void const * argument)
         finishFrecklePacket(&canMessage, getStatusBMaxDataLength(), getStatusBPacketID());
         CAN_enqueue_message(&canTxQueue, &canMessage);
 
-        encodeStatusCPacketStructure(&canMessage, &joint.statusC);
-        finishFrecklePacket(&canMessage, getStatusCMaxDataLength(), getStatusCPacketID());
-        CAN_enqueue_message(&canTxQueue, &canMessage);
+        if (joint.statusA.debug)
+        {
+          encodeStatusCPacketStructure(&canMessage, &joint.statusC);
+          finishFrecklePacket(&canMessage, getStatusCMaxDataLength(), getStatusCPacketID());
+          CAN_enqueue_message(&canTxQueue, &canMessage);
+        }
         previousTelemetryTime = currentTime;
       }
 
@@ -291,7 +294,6 @@ void transmit_can_frame_task(void const * argument)
       }
     }
     osMutexRelease(CANTxDataHandle); // Give the mutex
-
     // Every 10 seconds save settings is not enabled and settings changed. 
     deltaTime = currentTime - previousSettingsTime;
     if (deltaTime > 1000 && !joint.statusA.enabled && joint.internalFlags.saveSettingsFlag)

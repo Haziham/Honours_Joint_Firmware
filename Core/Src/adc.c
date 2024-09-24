@@ -182,7 +182,11 @@ float getCurrent()
 
 float getExternalVoltage()
 {
-    // return 20.5f;
-    return adcBuffer[EXTERNAL_ADC];
+    if (joint.commands.zeroExternalADC)
+    {
+        joint.commands.zeroExternalADC = 0;
+        joint.settings.calibration.externalADCOffset = adcBuffer[EXTERNAL_ADC];
+    }
+    return adcBuffer[EXTERNAL_ADC] - joint.settings.calibration.externalADCOffset;
 }
 /* USER CODE END 1 */

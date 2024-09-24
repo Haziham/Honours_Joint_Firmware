@@ -51,6 +51,7 @@ typedef struct {
     StatusB_t statusB;
     StatusC_t statusC;
     JointCommand_t command;
+    Commands_t commands;
     InternalFlags_t internalFlags;  
 } Joint_t;
 

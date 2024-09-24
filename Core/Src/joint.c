@@ -17,6 +17,7 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
 {
     // remove node ID from ID
     canMessage->id = canMessage->id >> 5;
+    Commands_t commands;
     if (canMessage->len == 0)
     {
         // Its a packet request 
@@ -35,6 +36,20 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
     {
         // Signal that settings should be saved
         joint.internalFlags.saveSettingsFlag = 1;
+    }
+    else if (decodeCommandsPacketStructure(canMessage, &commands))
+    {
+        if (commands.setEnabledMask)
+            joint.statusA.enabled = commands.setEnabled;
+
+        if (commands.beginCalibration)
+            // begin_calibration();
+
+        if (commands.setDebugModeMask)
+            joint.statusA.debug = commands.setDebugMode;
+
+        if (commands.zeroExternalADC)
+            joint.commands.zeroExternalADC = 1;
     }
     else
     {
