@@ -329,6 +329,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
 
 }
 
+
 void HAL_TIM_Encoder_MspDeInit(TIM_HandleTypeDef* tim_encoderHandle)
 {
 
@@ -392,4 +393,8 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 
 /* USER CODE BEGIN 1 */
 
+void TIM_updatePWMFrequencyTicks(TIM_HandleTypeDef *htim, uint16_t pulseTicks)
+{
+  htim->Instance->ARR = pulseTicks;
+}
 /* USER CODE END 1 */

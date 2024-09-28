@@ -32,7 +32,8 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
                 decodeCommandSettingsPacketStructure(canMessage, &joint.settings.command) | 
                 decodeEnablePacket(canMessage, &joint.statusA.enabled) |
                 decodeCalibrationSettingsPacketStructure(canMessage, &joint.settings.calibration) |
-                decodeControlSettingsPacketStructure(canMessage, &joint.settings.control))
+                decodeControlSettingsPacketStructure(canMessage, &joint.settings.control) |
+                decodeMotorSettingsPacketStructure(canMessage, &joint.settings.motor))
     {
         // Signal that settings should be saved
         joint.internalFlags.saveSettingsFlag = 1;
@@ -42,7 +43,7 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
         if (commands.setEnabledMask)
             joint.statusA.enabled = commands.setEnabled;
 
-        if (commands.beginCalibration)
+        // if (commands.beginCalibration)
             // begin_calibration();
 
         if (commands.setDebugModeMask)
@@ -51,7 +52,7 @@ void joint_decodeCANPackets(CAN_Message_t *canMessage)
         if (commands.zeroExternalADC)
             joint.commands.zeroExternalADC = 1;
     }
-    else
+    else 
     {
         // joint.statusA.error = 1;
     }
@@ -86,7 +87,7 @@ velocity, is the current velocity of the joint.
 position, is the current position of the joint
 
 */
-void joint_calibrate(int32_t *pwm, uint32_t position, int16_t velocity)
+void joint_calibrate(int32_t *dutyCycle, uint32_t position, int16_t velocity)
 {
     static int32_t maxPosition = 0;
     static int32_t minPosition = 0;
@@ -94,14 +95,14 @@ void joint_calibrate(int32_t *pwm, uint32_t position, int16_t velocity)
     switch (joint.internalFlags.calibrateStep)
     {
     case CALIBRATE_START:
-        *pwm = -CALIBRATION_PWM;
+        *dutyCycle = -CALIBRATION_DUTY_CYCLE;
         joint.internalFlags.calibrateStep = FIND_MIN;
         break;
     case FIND_MIN:
         if (velocity == 0)
         {
             minPosition = position;
-            *pwm = CALIBRATION_PWM;
+            *dutyCycle = CALIBRATION_DUTY_CYCLE;
             joint.internalFlags.calibrateStep = FIND_MAX;
         }
         break;
@@ -176,6 +177,9 @@ void send_requestedPacket(CAN_Message_t *canMessage)
     case PKT_CONTROL_SETTINGS:
         encodeControlSettingsPacketStructure(canMessage, &joint.settings.control);
         break;
+    case PKT_MOTOR_SETTINGS:
+        encodeMotorSettingsPacketStructure(canMessage, &joint.settings.motor);
+        break;
     default:
         // joint.statusA.error = 1;
         return;
@@ -192,29 +196,48 @@ void convert_countToAngle(int16_t *angle, int16_t count)
 
 
 
-void set_motorPWM(int32_t pwm, uint8_t offset)
+void joint_setPWMPulseWidth(uint16_t pulseWidthTicks, uint8_t direction)
 {
-    uint8_t direction = pwm > 0 ? DIR_FORWARD : DIR_BACKWARD;
-    pwm = pwm < 0 ? -pwm : pwm;
 
-    if (pwm != 0)
-    {
-        pwm += offset ? 5000 : 0;
-    }
+    uint16_t maxTicks = joint.settings.internal.pwmFrequencyTicks;
 
-    pwm = pwm > 65535 ? 65535 : pwm;
-    pwm = 65535 - pwm;
+    pulseWidthTicks = pulseWidthTicks > maxTicks ? maxTicks : pulseWidthTicks;
+    pulseWidthTicks = maxTicks - pulseWidthTicks;
 
     if (direction == DIR_FORWARD)
     {
-        __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, pwm);
-        __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 65535);
+        __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, pulseWidthTicks);
+        __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, maxTicks);
     }
     else
     {
-        __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 65535);
-        __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, pwm);
-    }
+        __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, maxTicks);
+        __HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, pulseWidthTicks);
 
+    }
 }
 
+void joint_setDutyCycle(int8_t dutyCycle, uint8_t offset)
+{
+    joint_updatePWMFrequency(joint.settings.motor.PWMFrequency);
+    uint16_t maxTicks = joint.settings.internal.pwmFrequencyTicks;
+    uint8_t direction = dutyCycle > 0 ? DIR_FORWARD : DIR_BACKWARD;
+    dutyCycle = dutyCycle > 0 ? dutyCycle : -dutyCycle;
+
+    if (dutyCycle != 0)
+    {
+        dutyCycle += offset ? 10 : 0;
+    }
+
+    uint16_t pulseWidthTicks = maxTicks / 100 * dutyCycle;
+    joint_setPWMPulseWidth(pulseWidthTicks, direction);
+}
+
+// frequency is in kHz
+void joint_updatePWMFrequency(uint16_t frequency)
+{
+    uint16_t pulseTicks = HAL_RCC_GetSysClockFreq() / 1000 / (htim16.Init.Prescaler + 1) / frequency;
+    joint.settings.internal.pwmFrequencyTicks = pulseTicks;
+    TIM_updatePWMFrequencyTicks(&htim16, pulseTicks);
+    TIM_updatePWMFrequencyTicks(&htim14, pulseTicks);
+}

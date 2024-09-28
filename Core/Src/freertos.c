@@ -152,7 +152,7 @@ void control_system_task(void const * argument)
   uint32_t previousTimeMs = 0;
   int32_t deltaTimeMs = 0;
   uint8_t updateVelocity = 0;
-  int32_t pwm = 0;
+  int32_t dutyCycle = 0;
   uint8_t offset = 0;
 
 
@@ -183,19 +183,19 @@ void control_system_task(void const * argument)
     {
       switch (joint.settings.command.mode)
       {
-        case CMD_PWM:
-          pwm = joint.command.value;
+        case CMD_DUTY_CYCLE:
+          dutyCycle = joint.command.value;
           offset = 1;
           break;
         case CMD_POSITION:
-          pwm = PID_calculate(&positionPID, joint.command.value + joint.settings.calibration.angleOffset, joint.statusA.position);
+          dutyCycle = PID_calculate(&positionPID, joint.command.value + joint.settings.calibration.angleOffset, joint.statusA.position);
           offset  = 1;
           break;
         case CMD_CALIBRATE:
           if (updateVelocity)
           {
             joint.statusA.calibrating = 1;
-            joint_calibrate(&pwm, joint.settings.internal.position, joint.statusA.velocity);
+            joint_calibrate(&dutyCycle, joint.settings.internal.position, joint.statusA.velocity);
             // joint.statusC.debugValue = pwm;
             offset = 1;
           }
@@ -203,12 +203,12 @@ void control_system_task(void const * argument)
         case CMD_VELOCITY:
         case CMD_TORQUE:
         default:
-          pwm = 0;
+          dutyCycle = 0;
           break;
       }
     }
     else {
-      pwm = 0;
+      dutyCycle = 0;
       offset = 0;
       joint.command.value = 0;
       joint.statusA.calibrating = 0;
@@ -224,14 +224,15 @@ void control_system_task(void const * argument)
     AngleStatus angleStatus = checkAngle(joint.statusA.position);
     if ( !joint.statusA.calibrating &&    
          angleStatus != ANGLE_WITHIN_BOUNDS &&
-        ((angleStatus == ANGLE_BELOW_MIN && pwm < 0) || (angleStatus == ANGLE_ABOVE_MAX && pwm > 0)))
+        ((angleStatus == ANGLE_BELOW_MIN && dutyCycle < 0) || (angleStatus == ANGLE_ABOVE_MAX && dutyCycle > 0)))
     {
-      pwm = 0;
+      dutyCycle = 0;
       offset = 0;
     }
 
 
-    set_motorPWM(pwm, offset);
+    // joint_setPWMPulseWidth(dutyCycle, offset);
+    joint_setDutyCycle(dutyCycle, offset);
     joint.statusB.current = getCurrent();
     joint.statusB.voltage = getVoltage();
     joint.statusB.externalADC = getExternalVoltage();

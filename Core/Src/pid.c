@@ -11,7 +11,10 @@ void PID_init(PID_t *pid, float* Kp, float* Ki, float* Kd, float Ts, float minOu
 	pid->Ts = Ts;
 	pid->previousError = 0;
 	pid->sumError = 0;
-	pid->maxIntegral = 1000;
+	pid->maxIntegral = 1000000;
+	pid->timeCounter = 0;
+	pid->previousDerivative = 0;
+	pid->derivativeTsMs = 10;
 }
 
 float PID_calculate(PID_t *pid, int setPoint, int feedback)
@@ -19,6 +22,7 @@ float PID_calculate(PID_t *pid, int setPoint, int feedback)
 	float output;
 	float error =  setPoint - feedback;
 	pid->sumError += error;
+	pid->timeCounter++;
 
 	// Anti-windup
 	if (pid->sumError > pid->maxIntegral)
@@ -28,13 +32,23 @@ float PID_calculate(PID_t *pid, int setPoint, int feedback)
 
 	output = *(pid->Kp) * error;
 	output += *(pid->Ki) * pid->sumError * pid->Ts;
-	output += *(pid->Kd) * (error - pid->previousError) / pid->Ts;
+	output += *(pid->Kd)/10000 * (error - pid->previousError) / pid->Ts;
+	// output += pid->previousDerivative;
 
 	joint.statusC.debugValue1 = *(pid->Kp) * error;
-	joint.statusC.debugValue2 = *(pid->Ki) * pid->sumError * pid->Ts;
-	joint.statusC.debugValue3 = *(pid->Kd) * (error - pid->previousError) / pid->Ts;
+	joint.statusC.debugValue3 = *(pid->Ki) * pid->sumError * pid->Ts;
+	joint.statusC.debugValue2 = *(pid->Kd)/1000 * (error - pid->previousError) / pid->Ts;
+	// joint.statusC.debugValue2 = pid->previousDerivative;
 
-	pid->previousError = error;
+	// if (pid->timeCounter % pid->derivativeTsMs == 0)
+	// {
+	// 	pid->previousDerivative = *(pid->Kd) * (error - pid->previousError) / pid->derivativeTsMs/1000;
+	// 	pid->previousError = error;
+	// }
+
+
+
+
 	output = output > pid->maxOutput ? pid->maxOutput : output;
 	output = output < pid->minOutput ? pid->minOutput : output;
 

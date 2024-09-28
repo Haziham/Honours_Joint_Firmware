@@ -24,7 +24,7 @@ typedef enum {
 } AngleStatus;
 
 
-#define CALIBRATION_PWM 10000
+#define CALIBRATION_DUTY_CYCLE 10;
 
 typedef struct {
     uint8_t saveSettingsFlag;
@@ -33,6 +33,7 @@ typedef struct {
 
 typedef struct {
     uint32_t position;
+    uint16_t pwmFrequencyTicks;
 } InternalSettings_t;
 
 typedef struct {
@@ -41,6 +42,7 @@ typedef struct {
     CommandSettings_t command;
     CalibrationSettings_t calibration;
     ControlSettings_t control;
+    MotorSettings_t motor;
     InternalSettings_t internal;
 } Settings_t;
 
@@ -63,7 +65,9 @@ void joint_decodeCANPackets(CAN_Message_t* canMessage);
 void send_requestedPacket(CAN_Message_t *canMessage);
 
 void convert_countToAngle(int16_t *angle, int16_t count);
-void set_motorPWM(int32_t pwm, uint8_t offset);
+void joint_setPWMPulseWidth(uint16_t pulseWidthTicks, uint8_t direction);
+void joint_setDutyCycle(int8_t dutyCycle, uint8_t offset);
+void joint_updatePWMFrequency(uint16_t frequency);
 
 #define save_settings() flash_writeBytes((uint8_t*)&joint, sizeof(Settings_t))
 #define load_settings() flash_readBytes((uint8_t*)&joint, sizeof(Settings_t))

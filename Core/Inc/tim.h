@@ -52,6 +52,7 @@ void MX_TIM16_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
+void TIM_updatePWMFrequencyTicks(TIM_HandleTypeDef *htim, uint16_t pulseTicks);
 
 /* USER CODE END Prototypes */
 

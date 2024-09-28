@@ -81,6 +81,7 @@ includeDirectories:
   - hlib/canQueue/*
 
 
+
 # Files that should be included in the compilation.
 # If a CubeMX makefile is present it will automatically include the  c and cpp/cxx files from that makefile.
 # Glob patterns (https://www.wikiwand.com/en/Glob_(programming)) can be used.
