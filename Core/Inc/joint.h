@@ -24,7 +24,7 @@ typedef enum {
 } AngleStatus;
 
 
-#define CALIBRATION_DUTY_CYCLE 10;
+#define CALIBRATION_DUTY_CYCLE 15;
 
 typedef struct {
     uint8_t saveSettingsFlag;

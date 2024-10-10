@@ -76,6 +76,9 @@ void send_settings(void)
     encodeCalibrationSettingsPacketStructure(&canMessage, &joint.settings.calibration);
     CAN_enqueue_message(&canTxQueue, &canMessage);
 
+    encodeMotorSettingsPacketStructure(&canMessage, &joint.settings.motor);
+    CAN_enqueue_message(&canTxQueue, &canMessage);
+
 }
 
 
@@ -226,7 +229,7 @@ void joint_setDutyCycle(int8_t dutyCycle, uint8_t offset)
 
     if (dutyCycle != 0)
     {
-        dutyCycle += offset ? 10 : 0;
+        dutyCycle += offset ? 20 : 0;
     }
 
     uint16_t pulseWidthTicks = maxTicks / 100 * dutyCycle;

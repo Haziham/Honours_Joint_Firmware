@@ -187,6 +187,7 @@ float getExternalVoltage()
         joint.commands.zeroExternalADC = 0;
         joint.settings.calibration.externalADCOffset = adcBuffer[EXTERNAL_ADC];
     }
-    return adcBuffer[EXTERNAL_ADC] - joint.settings.calibration.externalADCOffset;
+    return adcBuffer[EXTERNAL_ADC] ;
+    // return adcBuffer[EXTERNAL_ADC] - joint.settings.calibration.externalADCOffset;
 }
 /* USER CODE END 1 */

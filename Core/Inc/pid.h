@@ -7,14 +7,12 @@ typedef struct {
     float* Ki;
     float* Kd;
     float Ts;
-    float previousError;
+    float previousFeedback;
     float sumError;
     float maxOutput;
     float minOutput;
     float maxIntegral;
-    uint32_t timeCounter;
-    uint16_t derivativeTsMs;
-    float previousDerivative;
+    float previousError;
 } PID_t;
 
 void PID_init(PID_t *pid, float* Kp, float* Ki, float* Kd, float Ts, float minOutput, float maxOutput);
